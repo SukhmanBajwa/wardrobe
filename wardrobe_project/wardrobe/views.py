@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from .permissions import IsOwner
 from .serializers import ClothingItemSearializer
 from .models import ClothingItem
 
@@ -8,7 +9,7 @@ from .models import ClothingItem
 
 
 class ClothingItemViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwner]
     serializer_class = ClothingItemSearializer
 
     def get_queryset(self):
