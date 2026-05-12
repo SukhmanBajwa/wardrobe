@@ -1,6 +1,11 @@
 asgiref==3.11.1
+dj-rest-auth==7.2.0
 Django==6.0.4
+django-allauth==65.16.1
+djangorestframework==3.17.1
+djangorestframework_simplejwt==5.5.1
 psycopg2==2.9.12
+PyJWT==2.12.1
 python-decouple==3.8
 sqlparse==0.5.5
 tzdata==2026.2
