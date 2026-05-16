@@ -23,6 +23,8 @@ env_config = Config(RepositoryEnv(DOTENV_FILE))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env_config("SECRET_KEY")
+ANTHROPIC_API_KEY = env_config("ANTHROPIC_API_KEY")
+GEMINI_API_KEY = env_config('GEMINI_API_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
