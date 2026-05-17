@@ -5,16 +5,18 @@ from wardrobe.serializers import ClothingItemSearializer
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
-from django.conf import settings 
+from django.conf import settings
+
 # import anthropic
 from google import genai
+import json
 
 # client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
 client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
+
 # Create your views here.
 class RecommendationsAPIView(APIView):
-
 
     def get(self, request, id=None):
         if id:
@@ -27,7 +29,7 @@ class RecommendationsAPIView(APIView):
             inventory_data = inventory_serializer.data
 
             print(item_info, inventory_data)
-            
+
             # message = client.messages.create(
             #     model="claude-sonnet-4-6",
             #     max_tokens=1024,
@@ -45,9 +47,20 @@ class RecommendationsAPIView(APIView):
                         Reply only JSON not text, 
                         Good_match w/ [] of clothing_id and 
                         Complete_outfit w/ [] of best options from one per category.
-                        """
+                        """,
             )
             print(response)
-            return Response(response.text)
+
+            try:
+                decoded_json = json.loads(response.text)
+            except json.JSONDecodeError:
+                return Response(
+                    {"error": "Failed to decode AI response"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            return Response(decoded_json)
         else:
-            return Response({"error": "Invalid clothing Id"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Invalid clothing Id"}, status=status.HTTP_400_BAD_REQUEST
+            )
