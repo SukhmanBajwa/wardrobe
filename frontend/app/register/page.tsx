@@ -21,6 +21,7 @@ export default function Register() {
       process.env.NEXT_PUBLIC_API_URL + "/api/auth/registration/",
       {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: username,
@@ -141,7 +142,14 @@ export default function Register() {
               href="/login"
               className="text-indigo-400 hover:text-indigo-300 font-medium transition"
             >
-              Sign in
+              Sign in <br></br>
+            </a>
+            or with{" "}
+            <a
+              href="/login"
+              className="text-indigo-400 hover:text-indigo-300 font-medium transition"
+            >
+              Google
             </a>
           </p>
         </div>
