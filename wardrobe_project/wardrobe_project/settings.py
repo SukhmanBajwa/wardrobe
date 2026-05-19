@@ -24,7 +24,7 @@ env_config = Config(RepositoryEnv(DOTENV_FILE))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env_config("SECRET_KEY")
 ANTHROPIC_API_KEY = env_config("ANTHROPIC_API_KEY")
-GEMINI_API_KEY = env_config('GEMINI_API_KEY')
+GEMINI_API_KEY = env_config("GEMINI_API_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "dj_rest_auth",
     "dj_rest_auth.registration",
+    "corsheaders",
 ]
 
 SITE_ID = 1
@@ -62,6 +63,7 @@ SITE_ID = 1
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -157,3 +159,5 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 AUTH_USER_MODEL = "user.CustomUser"
+
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
