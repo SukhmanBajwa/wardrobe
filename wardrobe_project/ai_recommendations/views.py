@@ -40,7 +40,7 @@ class RecommendationsAPIView(APIView):
             # )
 
             response = client.models.generate_content(
-                model="gemini-3-flash-preview",
+                model="gemini-2.5-flash",
                 contents=f"""
                         src: {item_info}, inv_list: {inventory_data}, Recommend clothing-items that pair with src.
                         Also tell best matches from all, one per category. 
@@ -49,10 +49,30 @@ class RecommendationsAPIView(APIView):
                         Complete_outfit w/ [] of best options from one per category.
                         """,
             )
+            print(
+                "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$Raw AI response:"
+            )
             print(response)
 
+            response_text_split = list(response.text)
+            cleaned_response = ""
+            first_curly_index = 0
+            last_curly_index = len(response_text_split) - 1
+            print(type(response_text_split))
+            for i in enumerate(response_text_split):
+                if response_text_split[i[0]] == "{":
+                    first_curly_index = i[0]
+                if response_text_split[i[0]] == "}":
+                    last_curly_index = i[0]
+
+            cleaned_response = "".join(
+                response_text_split[first_curly_index : last_curly_index + 1]
+            )
+
+            print(cleaned_response)
+
             try:
-                decoded_json = json.loads(response.text)
+                decoded_json = json.loads(cleaned_response)
             except json.JSONDecodeError:
                 return Response(
                     {"error": "Failed to decode AI response"},
