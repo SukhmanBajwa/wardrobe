@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState } from "react";
 export default function Register() {
@@ -6,6 +7,8 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password1, setPassword1] = useState("");
   const [password2, setPassword2] = useState("");
+
+  const router = useRouter();
 
   async function sendRegisteration(
     username: string,
@@ -28,11 +31,10 @@ export default function Register() {
       },
     );
     if (res.ok) {
-      alert("Registration successful!");
-      window.location.href = "/Home";
+      router.push("/Home");
     } else {
       const data = await res.json();
-      alert(`Registration failed: ${data.error}`);
+      alert(`Registration failed: ${JSON.stringify(data)}`);
     }
   }
 
