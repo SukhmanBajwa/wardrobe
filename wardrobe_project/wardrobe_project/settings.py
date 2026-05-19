@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 from decouple import Config, RepositoryEnv
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -161,5 +162,9 @@ STATIC_URL = "static/"
 AUTH_USER_MODEL = "user.CustomUser"
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
+CORS_ALLOW_CREDENTIALS = True
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+ACCESS_TOKEN_LIFETIME = timedelta(hours=24)  # 24 hours
+REFRESH_TOKEN_LIFETIME = timedelta(days=7)  # 7 days
