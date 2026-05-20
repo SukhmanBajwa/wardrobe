@@ -166,5 +166,8 @@ CORS_ALLOW_CREDENTIALS = True
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-ACCESS_TOKEN_LIFETIME = timedelta(hours=24)  # 24 hours
-REFRESH_TOKEN_LIFETIME = timedelta(days=7)  # 7 days
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=24),  # 24 hours
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # 7 days
+    "ROTATE_REFRESH_TOKENS": True,
+}
