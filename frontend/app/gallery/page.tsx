@@ -29,9 +29,11 @@ export default function Gallery() {
     <div>
       <main>
         <h1>Gallery</h1>
-        {clothingItems.map((item) => (
-          <ClothingItemCard key={item.id} item={item} />
-        ))}
+        <div className="min-h-screen flex items-start justify-normal bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6">
+          {clothingItems.map((item) => (
+            <ClothingItemCard key={item.id} item={item} />
+          ))}
+        </div>
       </main>
     </div>
   );
