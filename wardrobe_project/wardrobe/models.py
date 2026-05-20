@@ -3,18 +3,27 @@ from user.models import CustomUser
 
 
 # Create your models here.
+class Category(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f"{self.name}"
+
+
 class ClothingItem(models.Model):
 
-    CATEGORY_CHOICES = [
-        ("tops", "Tops"),
-        ("bottoms", "Bottoms"),
-        ("shoes", "Shoes"),
-        ("outerwear", "Outerwear"),
-        ("accessories", "Accessories"),
-    ]
+    # CATEGORY_CHOICES = [
+    #     ("tops", "Tops"),
+    #     ("bottoms", "Bottoms"),
+    #     ("shoes", "Shoes"),
+    #     ("outerwear", "Outerwear"),
+    #     ("accessories", "Accessories"),
+    # ]
 
     name = models.CharField(max_length=30)
-    category = models.CharField(choices=CATEGORY_CHOICES, null=True, blank=True)
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True, blank=True
+    )
     description = models.TextField(null=True, blank=True)
     image_url = models.URLField(null=True, blank=True)
     user = models.ForeignKey(
