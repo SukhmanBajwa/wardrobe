@@ -25,7 +25,7 @@ export default function Login() {
     );
     if (res.ok) {
       alert("Login successful!");
-      router.push("/Home");
+      router.push("/gallery");
     } else {
       const data = await res.json();
       alert(`Login failed: ${JSON.stringify(data)}`);
