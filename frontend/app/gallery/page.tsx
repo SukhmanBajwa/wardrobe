@@ -22,6 +22,7 @@ export default function Gallery() {
         console.log("Clothing items:", clothing_data);
         setClothingItems(clothing_data);
         const categories: string[] = [
+          "All",
           ...new Set<string>(
             clothing_data.map((item: ClothingItem) => item.category),
           ),
@@ -52,6 +53,9 @@ export default function Gallery() {
           />
         </Link>
         <ul>
+          {/* <li className="inline-block text-white text-xs font-light border border-gray-500 px-3 py-1 rounded-full mr-2 mb-2">
+            All
+          </li> */}
           {categories.map((category) => (
             <li
               key={category}
