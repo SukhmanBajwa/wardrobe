@@ -1,20 +1,14 @@
 "use client";
 
 import Image from "next/image";
-interface ClothingItem {
-  id: number;
-  name: string;
-  description: string;
-  image_url: string;
-  //   tags: string[];
-  category: string;
-}
+import ClothingItem from "./types/clothing";
 
 interface ClothingItemCardProps {
   item: ClothingItem;
 }
 export default function ClothingItemCard({ item }: ClothingItemCardProps) {
   const { name, image_url, description, category } = item;
+  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
   return (
     <div className="h-95 w-75 bg-gray-800/60 rounded-2xl shadow-2xl p-8 border border-gray-700/50 border-t-2">
       <h2 className="py-2 font-bold">{name}</h2>
@@ -33,7 +27,7 @@ export default function ClothingItemCard({ item }: ClothingItemCardProps) {
           {tag}
         </span>
       ))} */}
-      <p>Category: {category}</p>
+      <p>Category: {capitalize(category)}</p>
       <p className="truncate ">Description: {description}</p>
     </div>
   );
