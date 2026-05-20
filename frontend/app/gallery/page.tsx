@@ -1,9 +1,15 @@
 "use client";
 import ClothingItemCard from "@/components/clothing_item_card";
-import { useEffect, useState } from "react";
+import ClothingItem from "./types/clothing";
+import { use, useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function Gallery() {
-  const [clothingItems, setClothingItems] = useState([]);
+  const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   useEffect(() => {
     const fetchClothingItems = async () => {
@@ -15,6 +21,13 @@ export default function Gallery() {
         const clothing_data = await res.json();
         console.log("Clothing items:", clothing_data);
         setClothingItems(clothing_data);
+        const categories: string[] = [
+          ...new Set<string>(
+            clothing_data.map((item: ClothingItem) => item.category),
+          ),
+        ];
+        setCategories(categories);
+        console.log("Categories:", categories);
       } else {
         const data = await res.json();
         console.error(
@@ -26,10 +39,32 @@ export default function Gallery() {
   }, []);
 
   return (
-    <div>
+    <div className="bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6">
+      <header className="border-b rounded-2xl shadow-2xl p-4 border-gray-700 ">
+        <Link href="/gallery">
+          <Image
+            src="/wardrobe.svg"
+            alt="Wardrobe logo"
+            width={80}
+            height={20}
+            priority
+            className="mx-start mb-3 rounded-xl"
+          />
+        </Link>
+        <ul>
+          {categories.map((category) => (
+            <li
+              key={category}
+              className="inline-block text-white text-xs font-light border border-gray-500 px-3 py-1 rounded-full mr-2 mb-2"
+            >
+              {capitalize(category)}
+            </li>
+          ))}
+        </ul>
+      </header>
       <main>
-        <h1>Gallery</h1>
-        <div className="min-h-screen flex items-start justify-normal bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6">
+        <p className="px-3">{clothingItems.length} items</p>
+        <div className="min-h-screen flex items-start justify-normal bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6 my-6">
           {clothingItems.map((item) => (
             <ClothingItemCard key={item.id} item={item} />
           ))}
