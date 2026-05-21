@@ -46,11 +46,13 @@ class Tag(models.Model):
 
 
 class ClothingItemTag(models.Model):
-    pk = models.CompositePrimaryKey("tag", "item")
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name="item_tag")
     item = models.ForeignKey(
         ClothingItem, on_delete=models.CASCADE, related_name="item"
     )
+
+    def __str__(self):
+        return f"{self.tag.name}"
 
 
 class SavedRecommendation(models.Model):
