@@ -1,13 +1,15 @@
 "use client";
 import ClothingItemCard from "@/components/clothing_item_card";
 import ClothingItem from "./types/clothing";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Gallery() {
   const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -40,7 +42,7 @@ export default function Gallery() {
   }, []);
 
   return (
-    <div className="bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6">
       <header className="border-b rounded-2xl shadow-2xl p-4 border-gray-700 ">
         <Link href="/gallery">
           <Image
@@ -53,9 +55,6 @@ export default function Gallery() {
           />
         </Link>
         <ul>
-          {/* <li className="inline-block text-white text-xs font-light border border-gray-500 px-3 py-1 rounded-full mr-2 mb-2">
-            All
-          </li> */}
           {categories.map((category) => (
             <li
               key={category}
@@ -68,9 +67,16 @@ export default function Gallery() {
       </header>
       <main>
         <p className="px-3">{clothingItems.length} items</p>
-        <div className="min-h-screen flex items-start justify-normal bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6 my-6">
+        <div className="flex items-start justify-normal px-4 gap-6 my-6">
           {clothingItems.map((item) => (
-            <ClothingItemCard key={item.id} item={item} />
+            <ClothingItemCard
+              key={item.id}
+              item={item}
+              onItemSelect={(item: ClothingItem) => {
+                setSelectedItem(item);
+                setDetailModalOpen(true);
+              }}
+            />
           ))}
         </div>
       </main>
