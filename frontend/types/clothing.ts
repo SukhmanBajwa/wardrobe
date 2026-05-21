@@ -3,6 +3,6 @@ interface ClothingItem {
   name: string;
   description: string;
   image_url: string;
-  //   tags: string[];
+  tags: string[];
   category: string;
 }
