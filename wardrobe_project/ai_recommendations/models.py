@@ -20,6 +20,7 @@ class AiRecommendation(models.Model):
         "wardrobe.ClothingItem", on_delete=models.CASCADE, related_name="recommended_by"
     )
     reason = models.TextField()
+    best_match = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Recommendation: {self.item.name} -> {self.recommended_item.name}"
