@@ -53,27 +53,3 @@ class ClothingItemTag(models.Model):
 
     def __str__(self):
         return f"{self.tag.name}"
-
-
-class SavedRecommendation(models.Model):
-    share_token = models.CharField(max_length=20, null=True, blank=True)
-    user = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, related_name="recommendation_user"
-    )
-    item = models.ForeignKey(
-        ClothingItem, on_delete=models.CASCADE, related_name="recommendation_item"
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-
-class SavedRecommendationItem(models.Model):
-    pk = models.CompositePrimaryKey("recommendation", "item")
-    recommendation = models.ForeignKey(
-        SavedRecommendation, on_delete=models.CASCADE, related_name="recommendation"
-    )
-    item = models.ForeignKey(
-        ClothingItem,
-        on_delete=models.CASCADE,
-        related_name="recommendation_item_relation",
-    )
-    ai_comment = models.TextField(null=True, blank=True)
