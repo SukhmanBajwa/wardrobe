@@ -1,5 +1,7 @@
 from django.shortcuts import render
+from httpx import request
 from rest_framework.views import APIView
+from .models import AiRecommendation
 from wardrobe.models import ClothingItem
 from wardrobe.serializers import ClothingItemSearializer
 from django.shortcuts import get_object_or_404
@@ -15,12 +17,106 @@ import json
 client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
 
+def Ai_Recommendations(item_info, inventory_data):
+
+    example = """
+            {
+            "Good_match": [
+                {
+                4: "A black maxi skirt provides a sophisticated and elegant contrast to the off-white shirt. The black color allows the golden pattern on the shirt to stand out beautifully, creating a chic and well-balanced ensemble."
+                },
+                {
+                3: "A vibrant red long skirt offers a bold and stylish contrast to the off-white shirt. This pairing creates striking visual interest, with the red adding warmth and personality that can complement the golden accents of the shirt."
+                }
+            ],
+            "Complete_outfit": [2,3,4]
+            }
+            """
+    response = client.models.generate_content(
+        # model="gemini-2.5-flash",
+        model="gemini-3.1-flash-lite",
+        # model="gemini-2.5-flash-lite",
+        contents=f"""
+                src: {item_info}, inv_list: {inventory_data}, Recommend clothing-items that pair with src.
+                Each recommended item should accompany a line of reasoning for why it pairs well.
+                Also tell best matches from all, one per category. 
+                Reply only JSON not text, 
+                Good_match w/ [] of key-value pairs (clothing_id: reason and 
+                Complete_outfit w/ [] of ids from best options from one per category.
+                {example}
+                """,
+    )
+    print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$Raw AI response:")
+    print(response)
+
+    response_text_split = list(response.text)
+    cleaned_response = ""
+    first_curly_index = 0
+    last_curly_index = len(response_text_split) - 1
+    found_first_curly = False
+
+    for i in enumerate(response_text_split):
+        if response_text_split[i[0]] == "{" and not found_first_curly:
+            first_curly_index = i[0]
+            found_first_curly = True
+        if response_text_split[i[0]] == "}":
+            last_curly_index = i[0]
+
+    cleaned_response = "".join(
+        response_text_split[first_curly_index : last_curly_index + 1]
+    )
+    print("-------------------------------------- \n CLEANED RESPONSE")
+    print(cleaned_response)
+
+    try:
+        return (json.loads(cleaned_response), status.HTTP_200_OK)
+
+    except json.JSONDecodeError:
+        return (
+            "Failed to decode AI response",
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+
+def Save_Ai_Recommendations(item_id, ai_recommendations):
+    print("_____________________ recommendaed items")
+    print(type(ai_recommendations))
+    print(ai_recommendations)
+    item = get_object_or_404(ClothingItem, id=item_id)
+    is_best_match = False
+    for each_recommended_item in ai_recommendations["Good_match"]:
+        print(f"----------------- each_recommended_item  \n {each_recommended_item}")
+        best_matches = ai_recommendations["Complete_outfit"]
+        print(best_matches)
+        for recommended_item_id, reason in each_recommended_item.items():
+            recommended_item = get_object_or_404(ClothingItem, id=recommended_item_id)
+            print(recommended_item_id)
+            if int(recommended_item_id) in best_matches:
+                is_best_match = True
+            print(is_best_match)
+            AiRecommendation.objects.create(
+                item=item,
+                recommended_item=recommended_item,
+                reason=reason,
+                best_match=is_best_match,
+            )
+            is_best_match = False
+
+
 # Create your views here.
 class RecommendationsAPIView(APIView):
 
     def get(self, request, id=None):
         if id:
             item = get_object_or_404(ClothingItem, id=id)
+            if item.recommendations.exists():
+                print(
+                    "---------------------- \n This is printed because a recommendation data existed for item"
+                )
+                return Response(
+                    item.recommendations.values(),
+                    status=status.HTTP_200_OK,
+                )
             serializer = ClothingItemSearializer(item)
             item_info = serializer.data
 
@@ -38,48 +134,11 @@ class RecommendationsAPIView(APIView):
             #         "content": f"{item_info} this the selected clothing item. Please recommend which of the following pairs well. Not restricted to one. And suggest the best pair. This list of the options are: {inventory_data}"
             #     }]
             # )
-
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=f"""
-                        src: {item_info}, inv_list: {inventory_data}, Recommend clothing-items that pair with src.
-                        Also tell best matches from all, one per category. 
-                        Reply only JSON not text, 
-                        Good_match w/ [] of clothing_id and 
-                        Complete_outfit w/ [] of best options from one per category.
-                        """,
-            )
-            print(
-                "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$Raw AI response:"
-            )
-            print(response)
-
-            response_text_split = list(response.text)
-            cleaned_response = ""
-            first_curly_index = 0
-            last_curly_index = len(response_text_split) - 1
-            print(type(response_text_split))
-            for i in enumerate(response_text_split):
-                if response_text_split[i[0]] == "{":
-                    first_curly_index = i[0]
-                if response_text_split[i[0]] == "}":
-                    last_curly_index = i[0]
-
-            cleaned_response = "".join(
-                response_text_split[first_curly_index : last_curly_index + 1]
-            )
-
-            print(cleaned_response)
-
-            try:
-                decoded_json = json.loads(cleaned_response)
-            except json.JSONDecodeError:
-                return Response(
-                    {"error": "Failed to decode AI response"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            return Response(decoded_json)
+            ai_reply, ai_reply_status = Ai_Recommendations(item_info, inventory_data)
+            print("-------------------------------------------------------")
+            print(ai_reply)
+            Save_Ai_Recommendations(item_info["id"], ai_reply)
+            return Response(ai_reply, status=ai_reply_status)
         else:
             return Response(
                 {"error": "Invalid clothing Id"}, status=status.HTTP_400_BAD_REQUEST
