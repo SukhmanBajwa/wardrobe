@@ -1,17 +1,22 @@
 "use client";
-import ClothingItemCard from "@/components/clothing_item_card";
+import ClothingItemCard from "@/components/ClothingItemCard";
 import ClothingItem from "./types/clothing";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import ItemDetail from "@/components/ItemDetail";
+import Logout from "@/components/Logout";
 
 export default function Gallery() {
   const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [logout, setLogout] = useState(false);
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchClothingItems = async () => {
@@ -31,6 +36,8 @@ export default function Gallery() {
         ];
         setCategories(categories);
         console.log("Categories:", categories);
+      } else if (res.status == 401) {
+        router.push("/login");
       } else {
         const data = await res.json();
         console.error(
@@ -44,16 +51,23 @@ export default function Gallery() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6">
       <header className="border-b rounded-2xl shadow-2xl p-4 border-gray-700 ">
-        <Link href="/gallery">
-          <Image
-            src="/wardrobe.svg"
-            alt="Wardrobe logo"
-            width={80}
-            height={20}
-            priority
-            className="mx-start mb-3 rounded-xl"
-          />
-        </Link>
+        <div className="flex justify-between">
+          <Link href="/gallery">
+            <Image
+              src="/wardrobe.svg"
+              alt="Wardrobe logo"
+              width={80}
+              height={20}
+              priority
+              className="mx-start mb-3 rounded-xl"
+            />
+          </Link>
+
+          <button className="cursor-pointer" onClick={() => setLogout(true)}>
+            Logout
+          </button>
+          {logout && <Logout></Logout>}
+        </div>
         <ul>
           {categories.map((category) => (
             <li
@@ -65,6 +79,7 @@ export default function Gallery() {
           ))}
         </ul>
       </header>
+      {detailModalOpen && selectedItem && <ItemDetail item={selectedItem} />}
       <main>
         <p className="px-3">{clothingItems.length} items</p>
         <div className="flex items-start justify-normal px-4 gap-6 my-6">
