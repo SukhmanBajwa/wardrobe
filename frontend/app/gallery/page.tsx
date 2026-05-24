@@ -25,13 +25,13 @@ export default function Gallery() {
         { method: "GET", credentials: "include" },
       );
       if (res.ok) {
-        const clothing_data = await res.json();
-        console.log("Clothing items:", clothing_data);
-        setClothingItems(clothing_data);
+        const clothingData = await res.json();
+        console.log("Clothing items:", clothingData);
+        setClothingItems(clothingData);
         const categories: string[] = [
           "All",
           ...new Set<string>(
-            clothing_data.map((item: ClothingItem) => item.category),
+            clothingData.map((item: ClothingItem) => item.category),
           ),
         ];
         setCategories(categories);
