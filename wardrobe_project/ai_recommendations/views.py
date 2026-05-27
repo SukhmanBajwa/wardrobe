@@ -3,11 +3,13 @@ from httpx import request
 from rest_framework.views import APIView
 from .models import AiRecommendation
 from wardrobe.models import ClothingItem
-from wardrobe.serializers import ClothingItemSearializer
+from wardrobe.serializers import ClothingItemSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.conf import settings
+from .serializers import AiRecommendationsSerilizer
 
 # import anthropic
 from google import genai
@@ -46,8 +48,6 @@ def Ai_Recommendations(item_info, inventory_data):
                 {example}
                 """,
     )
-    print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$Raw AI response:")
-    print(response)
 
     response_text_split = list(response.text)
     cleaned_response = ""
@@ -65,8 +65,6 @@ def Ai_Recommendations(item_info, inventory_data):
     cleaned_response = "".join(
         response_text_split[first_curly_index : last_curly_index + 1]
     )
-    print("-------------------------------------- \n CLEANED RESPONSE")
-    print(cleaned_response)
 
     try:
         return (json.loads(cleaned_response), status.HTTP_200_OK)
@@ -79,21 +77,15 @@ def Ai_Recommendations(item_info, inventory_data):
 
 
 def Save_Ai_Recommendations(item_id, ai_recommendations):
-    print("_____________________ recommendaed items")
-    print(type(ai_recommendations))
-    print(ai_recommendations)
     item = get_object_or_404(ClothingItem, id=item_id)
     is_best_match = False
     for each_recommended_item in ai_recommendations["Good_match"]:
-        print(f"----------------- each_recommended_item  \n {each_recommended_item}")
         best_matches = ai_recommendations["Complete_outfit"]
-        print(best_matches)
+
         for recommended_item_id, reason in each_recommended_item.items():
             recommended_item = get_object_or_404(ClothingItem, id=recommended_item_id)
-            print(recommended_item_id)
             if int(recommended_item_id) in best_matches:
                 is_best_match = True
-            print(is_best_match)
             AiRecommendation.objects.create(
                 item=item,
                 recommended_item=recommended_item,
@@ -105,40 +97,32 @@ def Save_Ai_Recommendations(item_id, ai_recommendations):
 
 # Create your views here.
 class RecommendationsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AiRecommendationsSerilizer
 
     def get(self, request, id=None):
         if id:
             item = get_object_or_404(ClothingItem, id=id)
             if item.recommendations.exists():
-                print(
-                    "---------------------- \n This is printed because a recommendation data existed for item"
-                )
+                recommendations = item.recommendations.all()
                 return Response(
-                    item.recommendations.values(),
+                    AiRecommendationsSerilizer(recommendations, many=True).data,
                     status=status.HTTP_200_OK,
                 )
-            serializer = ClothingItemSearializer(item)
+            serializer = ClothingItemSerializer(item)
             item_info = serializer.data
 
             inventory = ClothingItem.objects.filter(user=request.user)
-            inventory_serializer = ClothingItemSearializer(inventory, many=True)
+            inventory_serializer = ClothingItemSerializer(inventory, many=True)
             inventory_data = inventory_serializer.data
 
-            print(item_info, inventory_data)
-
-            # message = client.messages.create(
-            #     model="claude-sonnet-4-6",
-            #     max_tokens=1024,
-            #     messages=[{
-            #         "role": "user",
-            #         "content": f"{item_info} this the selected clothing item. Please recommend which of the following pairs well. Not restricted to one. And suggest the best pair. This list of the options are: {inventory_data}"
-            #     }]
-            # )
             ai_reply, ai_reply_status = Ai_Recommendations(item_info, inventory_data)
-            print("-------------------------------------------------------")
-            print(ai_reply)
             Save_Ai_Recommendations(item_info["id"], ai_reply)
-            return Response(ai_reply, status=ai_reply_status)
+            recommendations = item.recommendations.all()
+            return Response(
+                AiRecommendationsSerilizer(recommendations, many=True).data,
+                status=status.HTTP_200_OK,
+            )
         else:
             return Response(
                 {"error": "Invalid clothing Id"}, status=status.HTTP_400_BAD_REQUEST
