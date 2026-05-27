@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import ClothingItem, ClothingItemTag
 
 
-class ClothingItemSearializer(serializers.ModelSerializer):
+class ClothingItemSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField(
         many=False
     )  # This will display the category name instead of the ID

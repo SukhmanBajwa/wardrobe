@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsOwner
-from .serializers import ClothingItemSearializer
+from .serializers import ClothingItemSerializer
 from .models import ClothingItem
 
 # Create your views here.
@@ -10,7 +10,7 @@ from .models import ClothingItem
 
 class ClothingItemViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsOwner]
-    serializer_class = ClothingItemSearializer
+    serializer_class = ClothingItemSerializer
 
     def get_queryset(self):
         user = self.request.user
