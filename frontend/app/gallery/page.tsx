@@ -49,7 +49,10 @@ export default function Gallery() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6">
+    <div
+      className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6"
+      onClick={() => detailModalOpen && setDetailModalOpen(false)}
+    >
       <header className="border-b rounded-2xl shadow-2xl p-4 border-gray-700 ">
         <div className="flex justify-between">
           <Link href="/gallery">
@@ -79,7 +82,7 @@ export default function Gallery() {
           ))}
         </ul>
       </header>
-      {detailModalOpen && selectedItem && <ItemDetail item={selectedItem} />}
+
       <main>
         <p className="px-3">{clothingItems.length} items</p>
         <div className="flex items-start justify-normal px-4 gap-6 my-6">
@@ -94,6 +97,12 @@ export default function Gallery() {
             />
           ))}
         </div>
+        {detailModalOpen && selectedItem && (
+          <ItemDetail
+            item={selectedItem}
+            onClose={() => setDetailModalOpen(false)}
+          />
+        )}
       </main>
     </div>
   );
