@@ -7,12 +7,15 @@ import Image from "next/image";
 import Link from "next/link";
 import ItemDetail from "@/components/ItemDetail";
 import Logout from "@/components/Logout";
+import { CirclePlus } from "lucide-react";
+import AddClothingItem from "@/components/AddClothingItem";
 
 export default function Gallery() {
   const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [addItemModalOpen, setAddItemModalOpen] = useState(false);
   const [logout, setLogout] = useState(false);
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -51,7 +54,10 @@ export default function Gallery() {
   return (
     <div
       className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6"
-      onClick={() => detailModalOpen && setDetailModalOpen(false)}
+      onClick={() => {
+        detailModalOpen && setDetailModalOpen(false);
+        addItemModalOpen && setAddItemModalOpen(false);
+      }}
     >
       <header className="border-b rounded-2xl shadow-2xl p-4 border-gray-700 ">
         <div className="flex justify-between">
@@ -84,24 +90,37 @@ export default function Gallery() {
       </header>
 
       <main>
-        <p className="px-3">{clothingItems.length} items</p>
-        <div className="flex items-start justify-normal px-4 gap-6 my-6">
-          {clothingItems.map((item) => (
-            <ClothingItemCard
-              key={item.id}
-              item={item}
-              onItemSelect={(item: ClothingItem) => {
-                setSelectedItem(item);
-                setDetailModalOpen(true);
-              }}
+        <div className="flex flex-col">
+          <p className="px-3">{clothingItems.length} items</p>
+          <div className="flex items-start justify-normal px-4 gap-6 my-6">
+            {clothingItems.map((item) => (
+              <ClothingItemCard
+                key={item.id}
+                item={item}
+                onItemSelect={(item: ClothingItem) => {
+                  setSelectedItem(item);
+                  setDetailModalOpen(true);
+                }}
+              />
+            ))}
+          </div>
+          <div className="fixed bottom-6 right-6 cursor-pointer w-12 h-12">
+            <CirclePlus
+              size="40"
+              color="#ffffff"
+              className="transition duration-150 ease-in-out hover:scale-110 hover:fill-violet-300/50 active:scale-100"
+              onClick={() => setAddItemModalOpen(true)}
             />
-          ))}
+          </div>
         </div>
         {detailModalOpen && selectedItem && (
           <ItemDetail
             item={selectedItem}
             onClose={() => setDetailModalOpen(false)}
           />
+        )}
+        {addItemModalOpen && (
+          <AddClothingItem onClose={() => setAddItemModalOpen(false)} />
         )}
       </main>
     </div>
