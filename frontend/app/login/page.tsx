@@ -2,34 +2,13 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { sendLogin } from "@/functions/auth";
 import { useRouter } from "next/navigation";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
-
-  async function sendLogin(username: string, password: string) {
-    console.log("Sending login data:");
-    const res = await fetch(
-      process.env.NEXT_PUBLIC_API_URL + "/api/auth/login/",
-      {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: username,
-          password: password,
-        }),
-      },
-    );
-    if (res.ok) {
-      router.push("/gallery");
-    } else {
-      const data = await res.json();
-    }
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4">
       <div className="w-full max-w-md">
@@ -53,7 +32,15 @@ export default function Login() {
             className="flex flex-col gap-5"
             onSubmit={async (e) => {
               e.preventDefault();
-              await sendLogin(username, password);
+              const loginResponse: Response = await sendLogin(
+                username,
+                password,
+              );
+              if (loginResponse.ok) router.push("/gallery");
+              else {
+                const errorResponse = await loginResponse.json();
+                alert(`Login failed: ${JSON.stringify(errorResponse)}`);
+              }
             }}
           >
             <div className="flex flex-col gap-1.5">
@@ -101,6 +88,14 @@ export default function Login() {
               className="text-indigo-400 hover:text-indigo-300 font-medium transition"
             >
               Google
+            </a>{" "}
+            or Register
+            <a
+              href="/register"
+              className="text-indigo-400 hover:text-indigo-300 font-medium transition"
+            >
+              {" "}
+              here
             </a>
           </p>
         </div>

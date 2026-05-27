@@ -2,6 +2,8 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState } from "react";
+import { sendLogin } from "@/functions/auth";
+
 export default function Register() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -32,10 +34,17 @@ export default function Register() {
       },
     );
     if (res.ok) {
-      router.push("/Home");
+      const loginResponse: Response = await sendLogin(username, password1);
+      if (loginResponse.ok) router.push("/gallery");
+      else {
+        const errorResponse = await loginResponse.json();
+        alert(
+          `Login after registration failed: ${JSON.stringify(errorResponse)}`,
+        );
+      }
     } else {
-      const data = await res.json();
-      alert(`Registration failed: ${JSON.stringify(data)}`);
+      const errorResponse = await res.json();
+      alert(`Registration failed: ${JSON.stringify(errorResponse)}`);
     }
   }
 
