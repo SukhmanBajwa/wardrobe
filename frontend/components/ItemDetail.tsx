@@ -2,6 +2,7 @@ import "./ItemDetail.css";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 
 export default function ItemDetail({
   item,
@@ -50,29 +51,11 @@ export default function ItemDetail({
             <button className="col-span-1 cursor-pointer hover:bg-gray-200/5 active:bg-gray-500/5 p-1">
               Share
             </button>
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              onClick={onClose}
+            <X
+              size="40"
               className="cursor-pointer hover:bg-gray-200/5 active:bg-gray-500/5 p-1"
-            >
-              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-              <g
-                id="SVGRepo_tracerCarrier"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              ></g>
-              <g id="SVGRepo_iconCarrier">
-                {" "}
-                <path
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
-                  d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z"
-                  fill="#ffffff"
-                ></path>{" "}
-              </g>
-            </svg>
+              onClick={onClose}
+            />
           </div>
         </div>
         <hr className="border-gray-600 "></hr>
@@ -121,6 +104,7 @@ export default function ItemDetail({
                     </h3>
                     <p className="text-gray-400 text-xs">{rec.reason}</p>
                   </div>
+                  <hr className="m-2 border-gray-600 "></hr>
                 </div>
               ))}
           </div>
