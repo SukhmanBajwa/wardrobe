@@ -4,7 +4,13 @@ from user.models import CustomUser
 
 # Create your models here.
 class Category(models.Model):
-    name = models.CharField(max_length=20, unique=True)
+    name = models.CharField(max_length=20)
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="user_category"
+    )
+
+    class Meta:
+        unique_together = ["name", "user"]
 
     def __str__(self):
         return f"{self.name}"
