@@ -52,13 +52,7 @@ export default function Gallery() {
   }, []);
 
   return (
-    <div
-      className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6"
-      onClick={() => {
-        detailModalOpen && setDetailModalOpen(false);
-        addItemModalOpen && setAddItemModalOpen(false);
-      }}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6">
       <header className="border-b rounded-2xl shadow-2xl p-4 border-gray-700 ">
         <div className="flex justify-between">
           <Link href="/gallery">
@@ -78,21 +72,24 @@ export default function Gallery() {
           {logout && <Logout></Logout>}
         </div>
         <ul>
-          {categories.map((category) => (
-            <li
-              key={category}
-              className="inline-block text-white text-xs font-light border border-gray-500 px-3 py-1 rounded-full mr-2 mb-2"
-            >
-              {capitalize(category)}
-            </li>
-          ))}
+          {categories.map(
+            (category) =>
+              !!category && (
+                <li
+                  key={category}
+                  className="inline-block text-white text-xs font-light border border-gray-500 px-3 py-1 rounded-full mr-2 mb-2"
+                >
+                  {capitalize(category)}
+                </li>
+              ),
+          )}
         </ul>
       </header>
 
       <main>
         <div className="flex flex-col">
           <p className="px-3">{clothingItems.length} items</p>
-          <div className="flex items-start justify-normal px-4 gap-6 my-6">
+          <div className="flex items-start justify-normal flex-wrap px-4 gap-6 my-6">
             {clothingItems.map((item) => (
               <ClothingItemCard
                 key={item.id}
