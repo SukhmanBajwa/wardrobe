@@ -40,9 +40,11 @@ export default function ClothingItemCard({
       </div>
       <div className="flex flex-col justify-between items-start px-2.5 py-3 gap-y-1">
         <h2 className="pt-1 text-sm">{name}</h2>
-        <p className="border px-2 py-0.5 rounded-2xl w-fit bg-indigo-600/50 border-gray-500 text-indigo-200 text-xs font-light">
-          {capitalize(category)}
-        </p>
+        {!!category && (
+          <p className="border px-2 py-0.5 rounded-2xl w-fit bg-indigo-600/50 border-gray-500 text-indigo-200 text-xs font-light">
+            {capitalize(category)}
+          </p>
+        )}
       </div>
     </div>
   );
