@@ -2,7 +2,7 @@ interface ClothingItem {
   id: number;
   name: string;
   description: string;
-  image_url: string;
+  image: File | null;
   tags: string[];
   category: string;
 }

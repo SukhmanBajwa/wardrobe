@@ -18,7 +18,11 @@ class ClothingItemViewSet(viewsets.ModelViewSet):
         return ClothingItem.objects.filter(user=user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        print("FILES:", self.request.FILES)
+        print("DATA:", self.request.data)
+        instance = serializer.save(user=self.request.user)
+        print("Image field:", instance.image)
+        print("Image name:", instance.image.name if instance.image else "None")
 
 
 class ClothesCategoriesViewSet(viewsets.ModelViewSet):

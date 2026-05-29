@@ -60,7 +60,7 @@ export default function ItemDetail({
         <div className="modal-body flex flex-row p-3">
           <div className="item w-1/2">
             <Image
-              src={item.image_url}
+              src={item.image_url || "https://picsum.photos/id/237/500/700"}
               alt={item.name}
               width={250}
               height={250}

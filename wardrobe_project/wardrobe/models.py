@@ -1,5 +1,6 @@
 from django.db import models
 from user.models import CustomUser
+from cloudinary.models import CloudinaryField
 
 
 # Create your models here.
@@ -31,7 +32,8 @@ class ClothingItem(models.Model):
         Category, on_delete=models.SET_NULL, null=True, blank=True
     )
     description = models.TextField(null=True, blank=True)
-    image_url = models.URLField(null=True, blank=True)
+    image = models.ImageField(upload_to="clothing/", blank=True)
+    # image_url = models.URLField(null=True, blank=True)
     user = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name="user_clothes"
     )

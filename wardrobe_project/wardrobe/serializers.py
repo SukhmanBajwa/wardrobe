@@ -7,25 +7,34 @@ class ClothingItemSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField(
         many=False
     )  # This will display the category name instead of the ID
-    set_category = serializers.IntegerField(
+    category_name = serializers.CharField(
         write_only=True, required=False
     )  # This will accept the name of category white POST
     tags = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
+
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
 
     def get_tags(self, obj):
         rows = obj.item.all()
         return [row.tag.name for row in rows]
 
-    def validate_set_category(self, value):
-        if not Category.objects.filter(id=value).exists():
+    def validate_category_name(self, value):
+        print(value)
+        if not Category.objects.filter(name=value).exists():
             raise serializers.ValidationError(
                 f"{value} is not found in list of available categories."
             )
         return value
 
     def create(self, validated_data):
-        category_id = validated_data.pop("set_category", None)
-        category = Category.objects.get(id=category_id) if category_id else None
+        category_name = validated_data.pop("category_name", None)
+        print(category_name)
+        category = Category.objects.get(name=category_name) if category_name else None
+        print(category)
         return ClothingItem.objects.create(category=category, **validated_data)
 
     class Meta:
@@ -34,8 +43,9 @@ class ClothingItemSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "category",
-            "set_category",
+            "category_name",
             "description",
+            "image",
             "image_url",
             "user",
             "tags",

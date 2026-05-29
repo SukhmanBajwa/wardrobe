@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 from decouple import Config, RepositoryEnv
 from datetime import timedelta
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +29,17 @@ env_config = Config(RepositoryEnv(DOTENV_FILE))
 SECRET_KEY = env_config("SECRET_KEY")
 ANTHROPIC_API_KEY = env_config("ANTHROPIC_API_KEY")
 GEMINI_API_KEY = env_config("GEMINI_API_KEY")
+
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": env_config("Cloudinary_Cloud_Name"),
+    "API_KEY": env_config("Cloudinary_API_KEY"),
+    "API_SECRET": env_config("Cloudinary_API_SECRET"),
+}
+cloudinary.config(
+    cloud_name=env_config("Cloudinary_Cloud_Name"),
+    api_key=env_config("Cloudinary_API_KEY"),
+    api_secret=env_config("Cloudinary_API_SECRET"),
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -41,6 +55,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "cloudinary_storage",
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "user",
@@ -57,6 +72,7 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "corsheaders",
+    "cloudinary",
 ]
 
 SITE_ID = 1
@@ -158,6 +174,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+
+# Cloudinary
+MEDIA_URL = "/media/"
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 AUTH_USER_MODEL = "user.CustomUser"
 

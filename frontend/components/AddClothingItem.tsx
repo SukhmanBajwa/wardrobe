@@ -7,20 +7,29 @@ import { useEffect, useState } from "react";
 export default function AddClothingItem({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [image_url, setImage_url] = useState("");
-  const [category, setCategory] = useState<number | null>(null);
+  const [image, setImage] = useState<File>();
+  const [categoryName, setCategoryName] = useState<string>("");
   const [categoriesAvailable, setCategoriesAvailable] = useState<
     { id: number; name: string }[]
   >([]);
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   const addNewClothingItem: () => void = async () => {
-    if (!category) {
+    const formData = new FormData();
+    if (!categoryName) {
       alert("Please select a category");
       return;
     }
-    console.log(category);
-    await addItem(name, category, description, image_url);
+    if (!image) {
+      alert("Please select a category");
+      return;
+    }
+    console.log(categoryName);
+    formData.append("name", name);
+    formData.append("category_name", categoryName);
+    formData.append("description", description);
+    formData.append("image", image);
+    await addItem(formData);
   };
 
   useEffect(() => {
@@ -84,6 +93,7 @@ export default function AddClothingItem({ onClose }: { onClose: () => void }) {
               type="file"
               className="hidden"
               accept="image/*"
+              onChange={(e) => setImage(e.target.files?.[0])}
             />
             <p className="text-xs text-gray-500">JPG, PNG up to 10MB</p>
           </div>
@@ -106,7 +116,7 @@ export default function AddClothingItem({ onClose }: { onClose: () => void }) {
                 <select
                   name="category"
                   defaultValue={"Select"}
-                  onChange={(e) => setCategory(Number(e.target.value))}
+                  onChange={(e) => setCategoryName(e.target.value)}
                   className="h-12.5 px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="Select" disabled>
@@ -114,7 +124,7 @@ export default function AddClothingItem({ onClose }: { onClose: () => void }) {
                   </option>
                   {categoriesAvailable &&
                     categoriesAvailable.map((category) => (
-                      <option key={category.id} value={category.id}>
+                      <option key={category.id} value={category.name}>
                         {capitalize(category.name)}
                       </option>
                     ))}

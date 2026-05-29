@@ -23,20 +23,26 @@ export default function ClothingItemCard({
     >
       <div className="border-b bg-graw-900 border-gray-700/50">
         <Image
-          src={image_url}
+          src={image_url || "https://picsum.photos/id/237/500/700"}
           alt={name}
           width={100}
           height={100}
           className="h-75 w-59 object-cover rounded-lg  bg-gray-900/100"
         />
-        {tags.map((tag: string) => (
-          <span
-            key={tag}
-            className="inline-block text-gray-400 text-xs font-light p-1"
-          >
-            #{tag}
+        {tags.length > 0 ? (
+          tags.map((tag: string) => (
+            <span
+              key={tag}
+              className="inline-block text-gray-400 text-xs font-light p-1"
+            >
+              #{tag}
+            </span>
+          ))
+        ) : (
+          <span className="inline-block text-gray-400 text-xs font-light p-1">
+            #N/A
           </span>
-        ))}
+        )}
       </div>
       <div className="flex flex-col justify-between items-start px-2.5 py-3 gap-y-1">
         <h2 className="pt-1 text-sm">{name}</h2>

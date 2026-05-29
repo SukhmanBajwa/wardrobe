@@ -25,7 +25,7 @@ class ClothingItemAdmin(admin.ModelAdmin):
         "category",
         "tags",
         "description",
-        "image_url",
+        "image",
         "user",
     )
     search_fields = (
@@ -33,7 +33,7 @@ class ClothingItemAdmin(admin.ModelAdmin):
         "name",
         "category",
         "description",
-        "image_url",
+        "image",
         "user",
     )
     list_filter = ("id", "user", "name", "category")
