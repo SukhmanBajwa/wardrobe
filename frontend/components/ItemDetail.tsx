@@ -89,7 +89,10 @@ export default function ItemDetail({
                   className="recommendation-card flex flex-row gap-3"
                 >
                   <Image
-                    src={rec.recommended_item.image_url}
+                    src={
+                      rec.recommended_item.image ||
+                      "https://picsum.photos/id/237/500/700"
+                    }
                     alt={rec.recommended_item.name}
                     width={100}
                     height={100}

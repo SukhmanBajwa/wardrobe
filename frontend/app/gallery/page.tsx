@@ -9,6 +9,7 @@ import ItemDetail from "@/components/ItemDetail";
 import Logout from "@/components/Logout";
 import { CirclePlus } from "lucide-react";
 import AddClothingItem from "@/components/AddClothingItem";
+import { fetchClothingItems } from "@/functions/getClothingItem";
 
 export default function Gallery() {
   const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
@@ -22,19 +23,16 @@ export default function Gallery() {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchClothingItems = async () => {
-      const res = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + "/v1/clothing_items/",
-        { method: "GET", credentials: "include" },
-      );
+    const fetchItems = async () => {
+      const res: Response = await fetchClothingItems();
       if (res.ok) {
-        const clothingData = await res.json();
-        console.log("Clothing items:", clothingData);
-        setClothingItems(clothingData);
+        const clothingData = res.json();
+        console.log("Clothing items:", await clothingData);
+        setClothingItems(await clothingData);
         const categories: string[] = [
           "All",
           ...new Set<string>(
-            clothingData.map((item: ClothingItem) => item.category),
+            clothingItems.map((item: ClothingItem) => item.category),
           ),
         ];
         setCategories(categories);
@@ -48,7 +46,7 @@ export default function Gallery() {
         );
       }
     };
-    fetchClothingItems();
+    fetchItems();
   }, []);
 
   return (
