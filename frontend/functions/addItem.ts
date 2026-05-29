@@ -1,5 +1,6 @@
 export async function addItem(
   name: string,
+  category: number,
   description: string,
   image_url: string,
 ) {
@@ -11,6 +12,7 @@ export async function addItem(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: name,
+        set_category: category,
         description: description,
         image_url: image_url,
       }),
