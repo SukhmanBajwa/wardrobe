@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import ClothingItem from "./types/clothing";
 
 interface ClothingItemCardProps {
   item: ClothingItem;
