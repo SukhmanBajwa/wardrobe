@@ -57,7 +57,8 @@ export default function Login() {
                 password,
               );
               if (loginResponse.ok) {
-                setLoginState(true);
+                const userData = await WhoAmI();
+                setUser(userData);
                 router.push("/gallery");
               } else {
                 const errorResponse = await loginResponse.json();
