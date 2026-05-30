@@ -1,14 +1,34 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { sendLogin } from "@/functions/auth";
 import { useRouter } from "next/navigation";
+import { WhoAmI } from "@/functions/userLoginState";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [user, setUser] = useState<UserData | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const userData = await WhoAmI();
+      setUser(userData);
+    };
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    const getLoginState = () => {
+      if (user) {
+        router.push("/gallery");
+      }
+    };
+    getLoginState();
+  }, [user]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4">
       <div className="w-full max-w-md">
@@ -36,8 +56,10 @@ export default function Login() {
                 username,
                 password,
               );
-              if (loginResponse.ok) router.push("/gallery");
-              else {
+              if (loginResponse.ok) {
+                setLoginState(true);
+                router.push("/gallery");
+              } else {
                 const errorResponse = await loginResponse.json();
                 alert(`Login failed: ${JSON.stringify(errorResponse)}`);
               }

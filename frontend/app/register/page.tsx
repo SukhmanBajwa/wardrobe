@@ -1,8 +1,9 @@
 "use client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { sendLogin } from "@/functions/auth";
+import { WhoAmI } from "@/functions/userLoginState";
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -10,7 +11,26 @@ export default function Register() {
   const [password1, setPassword1] = useState("");
   const [password2, setPassword2] = useState("");
 
+  const [user, setUser] = useState<UserData | null>(null);
+  const [loginState, setLoginState] = useState<boolean>(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const userData = await WhoAmI();
+      setUser(userData);
+    };
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    const getLoginState = () => {
+      if (user) {
+        router.push("/gallery");
+      }
+    };
+    getLoginState();
+  }, [user]);
 
   async function sendRegisteration(
     username: string,
