@@ -2,10 +2,6 @@
 
 import Image from "next/image";
 
-interface ClothingItemCardProps {
-  item: ClothingItem;
-  onItemSelect: (item: ClothingItem) => void;
-}
 export default function ClothingItemCard({
   item,
   onItemSelect,
