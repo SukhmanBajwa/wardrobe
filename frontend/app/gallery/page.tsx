@@ -8,7 +8,8 @@ import ItemDetail from "@/components/ItemDetail";
 import Logout from "@/components/Logout";
 import { CirclePlus } from "lucide-react";
 import AddClothingItem from "@/components/AddClothingItem";
-import { fetchClothingItems } from "@/functions/getClothingItem";
+import { fetchClothingItems } from "@/functions/clothingItems";
+import { fetchCategories } from "@/functions/categories";
 
 export default function Gallery() {
   const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
@@ -24,20 +25,30 @@ export default function Gallery() {
   const router = useRouter();
 
   useEffect(() => {
+    // Fetching items with search and filter parameters
     const fetchItems = async () => {
-      const res: Response = await fetchClothingItems();
+      const res: Response = await fetchClothingItems(
+        searchParam || "",
+        categoryFilter ? (categoryFilter == "All" ? "" : categoryFilter) : "",
+      );
       if (res.ok) {
-        const clothingData = await res.json();
-        console.log("Clothing items:", await clothingData);
-        setClothingItems(await clothingData);
-        const categories: string[] = [
-          "All",
-          ...new Set<string>(
-            clothingData.map((item: ClothingItem) => item.category),
-          ),
-        ];
-        setCategories(categories);
-        console.log("Categories:", categories);
+        setClothingItems(await res.json());
+
+        // fetching all categories
+        const categoryFetchResponse: Response = await fetchCategories();
+
+        if (categoryFetchResponse.ok) {
+          const categoriesArray: string[] = await categoryFetchResponse.json();
+          setCategories([
+            "All",
+            ...new Set<string>(
+              categoriesArray.map((category) => category["name"]),
+            ),
+          ]);
+        } else {
+          const data = await categoryFetchResponse.json();
+          console.error(`Failed to fetch categories: ${JSON.stringify(data)}`);
+        }
       } else if (res.status == 401) {
         router.push("/login");
       } else {
@@ -47,8 +58,14 @@ export default function Gallery() {
         );
       }
     };
-    fetchItems();
-  }, []);
+    const timer = setTimeout(
+      () => {
+        fetchItems();
+      },
+      searchParam ? 300 : 0,
+    );
+    return () => clearTimeout(timer);
+  }, [searchParam, categoryFilter]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6">
@@ -70,59 +87,51 @@ export default function Gallery() {
           </button>
           {logout && <Logout></Logout>}
         </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-sm text-gray-300">Name</label>
-          <textarea
-            name="name"
-            onChange={(e) => setSearchParam(e.target.value)}
-            placeholder="Item name"
-            rows={1}
-            className=" resize-none px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+        <div className="flex flex-row justify-between items-center">
+          <div className="pt-3">
+            <ul>
+              {categories.map((category) => (
+                <li
+                  key={category}
+                  className="inline-block cursor-pointer text-white text-xs font-light border border-gray-500 px-3 py-1 rounded-full mr-2 mb-2  active:bg-indigo-500 focus:bg-indigo-500"
+                  onClick={() => {
+                    setCategoryFilter(category);
+                    if (category == "All" && searchParam) {
+                      setSearchParam("");
+                    }
+                  }}
+                >
+                  {capitalize(category)}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <input
+              id="search"
+              value={searchParam}
+              placeholder="Search: Name, Description or Tags"
+              onChange={(e) => setSearchParam(e.target.value)}
+              className="w-[30vw] focus:w-[50vw] hover:w-[50vw] transition-all duration-300 resize-none px-4 py-3 rounded-3xl bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
         </div>
-        <ul>
-          {categories.map((category) => (
-            <li
-              key={category}
-              className="inline-block cursor-pointer text-white text-xs font-light border border-gray-500 px-3 py-1 rounded-full mr-2 mb-2  active:bg-indigo-500 focus:bg-indigo-500"
-              onClick={() => setCategoryFilter(category)}
-            >
-              {capitalize(category)}
-            </li>
-          ))}
-        </ul>
       </header>
 
       <main>
         <div className="flex flex-col">
           <p className="px-3">{clothingItems.length} items</p>
           <div className="flex items-start justify-normal flex-wrap px-4 gap-6 my-6">
-            {clothingItems
-              .filter(
-                (item) =>
-                  categoryFilter === "All" || item.category === categoryFilter,
-              )
-              .filter(
-                (item) =>
-                  searchParam === "" ||
-                  item.name.toLowerCase().includes(searchParam.toLowerCase()) ||
-                  item.description
-                    ?.toLowerCase()
-                    .includes(searchParam.toLowerCase()) ||
-                  item.tags.some((tag) =>
-                    tag.toLowerCase().includes(searchParam),
-                  ),
-              )
-              .map((item) => (
-                <ClothingItemCard
-                  key={item.id}
-                  item={item}
-                  onItemSelect={(item: ClothingItem) => {
-                    setSelectedItem(item);
-                    setDetailModalOpen(true);
-                  }}
-                />
-              ))}
+            {clothingItems.map((item) => (
+              <ClothingItemCard
+                key={item.id}
+                item={item}
+                onItemSelect={(item: ClothingItem) => {
+                  setSelectedItem(item);
+                  setDetailModalOpen(true);
+                }}
+              />
+            ))}
           </div>
           <div className="fixed bottom-6 right-6 cursor-pointer w-12 h-12">
             <CirclePlus
