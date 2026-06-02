@@ -23,7 +23,6 @@ class ClothingItemSerializer(serializers.ModelSerializer):
         return [row.tag.name for row in rows]
 
     def validate_category_name(self, value):
-        print(value)
         if not Category.objects.filter(name=value).exists():
             raise serializers.ValidationError(
                 f"{value} is not found in list of available categories."
@@ -32,13 +31,12 @@ class ClothingItemSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         category_name = validated_data.pop("category_name", None)
-        print(category_name)
         category = Category.objects.get(name=category_name) if category_name else None
-        print(category)
         return ClothingItem.objects.create(category=category, **validated_data)
 
     class Meta:
         model = ClothingItem
+
         fields = [
             "id",
             "name",
@@ -51,6 +49,7 @@ class ClothingItemSerializer(serializers.ModelSerializer):
             "tags",
         ]
         read_only_fields = ["user"]
+        write_only_fields = ["is_deleted"]
 
 
 class CategoriesSerializer(serializers.ModelSerializer):

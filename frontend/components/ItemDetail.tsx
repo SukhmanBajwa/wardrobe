@@ -1,15 +1,17 @@
 import "./ItemDetail.css";
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { deleteClothingItem } from "@/functions/clothingItems";
 
 export default function ItemDetail({
   item,
   onClose,
+  onDelete,
 }: {
   item: ClothingItem;
   onClose: () => void;
+  onDelete: () => void;
 }) {
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
   const [aiRecommendations, setAiRecommendations] = useState();
@@ -42,12 +44,22 @@ export default function ItemDetail({
             <h1 className="text-2xl font-bold text-gray-200">Item details</h1>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             <button className="col-span-1 cursor-pointer hover:bg-gray-200/5 active:bg-gray-500/5 p-1">
               Edit
             </button>
             <button className="col-span-1 cursor-pointer hover:bg-gray-200/5 active:bg-gray-500/5 p-1">
               Share
+            </button>
+            <button
+              className="col-span-1 cursor-pointer hover:bg-gray-200/5 active:bg-gray-500/5 p-1"
+              onClick={() => {
+                deleteClothingItem(item.id);
+                onDelete();
+                onClose();
+              }}
+            >
+              Delete
             </button>
             <X
               size="40"

@@ -145,7 +145,14 @@ export default function Gallery() {
         {detailModalOpen && selectedItem && (
           <ItemDetail
             item={selectedItem}
-            onClose={() => setDetailModalOpen(false)}
+            onClose={() => {
+              setDetailModalOpen(false);
+            }}
+            onDelete={() =>
+              setClothingItems((prev) =>
+                prev.filter((item) => item.id !== selectedItem.id),
+              )
+            }
           />
         )}
         {addItemModalOpen && (

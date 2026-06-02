@@ -13,7 +13,6 @@ export default function ClothingItemCard({
       className="bg-gray-800/60 rounded-2xl shadow-2xl  border border-gray-700/50 border-t-2 cursor-pointer hover:shadow-blue-100 hover:shadow-sm hover:border-gray-500/50 active:shadow-green-100 active:shadow-sm active:border-gray-500/50 transition duration-300 ease-in-out"
       onClick={() => {
         onItemSelect(item);
-        console.log("Selected item:", item);
       }}
     >
       <div className="border-b bg-graw-900 border-gray-700/50">
