@@ -8,10 +8,12 @@ export default function ItemDetail({
   item,
   onClose,
   onDelete,
+  onEdit,
 }: {
   item: ClothingItem;
   onClose: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
+  onEdit?: () => void;
 }) {
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
   const [aiRecommendations, setAiRecommendations] = useState();
@@ -37,7 +39,7 @@ export default function ItemDetail({
   }, []);
 
   return (
-    <div className=" modal-container bg-black/50">
+    <div className=" modal-container bg-black/50 absolute z-20">
       <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 rounded-xl p-6 w-full max-w-3xl max-h-screen overflow-y-auto">
         <div className="modal-header flex justify-between">
           <div className="">
@@ -48,8 +50,7 @@ export default function ItemDetail({
             <button
               className="col-span-1 cursor-pointer hover:bg-gray-200/5 active:bg-gray-500/5 p-1"
               onClick={() => {
-                ClothingItem(item.id);
-                onDelete();
+                onEdit();
                 onClose();
               }}
             >

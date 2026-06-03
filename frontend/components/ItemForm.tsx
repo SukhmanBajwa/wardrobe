@@ -1,21 +1,26 @@
 "use client";
-import Image from "next/image";
-import { X, Plus, ImageIcon } from "lucide-react";
-import { addItem } from "@/functions/addItem";
+import { X, Plus } from "lucide-react";
+import { addClothingItem, editClothingItem } from "@/functions/clothingItems";
 import { useEffect, useState } from "react";
 import { fetchAvailableCategories } from "@/functions/clothingItems";
 
-export default function AddClothingItem({ onClose }: { onClose: () => void }) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [image, setImage] = useState<File>();
-  const [categoryName, setCategoryName] = useState<string>("");
+export default function ItemForm({
+  onClose,
+  item,
+}: {
+  onClose: () => void;
+  item?: ClothingItem | null;
+}) {
+  const [name, setName] = useState(item?.name ?? "");
+  const [description, setDescription] = useState(item?.description ?? "");
+  const [image, setImage] = useState((item?.image ?? null) || undefined);
+  const [categoryName, setCategoryName] = useState(item?.category ?? "");
   const [categoriesAvailable, setCategoriesAvailable] = useState<
     { id: number; name: string }[]
   >([]);
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-  const addNewClothingItem: () => void = async () => {
+  const buildFormData: () => void = async () => {
     const formData = new FormData();
     if (!categoryName) {
       alert("Please select a category");
@@ -30,7 +35,11 @@ export default function AddClothingItem({ onClose }: { onClose: () => void }) {
     formData.append("category_name", categoryName);
     formData.append("description", description);
     formData.append("image", image);
-    await addItem(formData);
+
+    if (item) {
+      await editClothingItem(item.id, formData);
+    }
+    await addClothingItem(formData);
   };
 
   useEffect(() => {
@@ -40,13 +49,16 @@ export default function AddClothingItem({ onClose }: { onClose: () => void }) {
     fetchCategories();
   }, []);
 
-  const imgPreview = image ? URL.createObjectURL(image) : null;
+  const imgPreview =
+    image instanceof File ? URL.createObjectURL(image) : (image ?? null);
   return (
-    <div className=" modal-container bg-black/50">
-      <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 rounded-xl p-6 w-full max-w-3xl max-h-screen overflow-y-auto">
+    <div className=" absolute modal-container bg-black/50 z-20">
+      <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 rounded-xl p-6 w-full max-w-3xl max-h-screen overflow-y-auto ">
         <div className="modal-header flex justify-between">
           <div className="flex justify-evenly gap-9">
-            <h1 className="text-2xl font-bold text-gray-200">Add new item</h1>
+            <h1 className="text-2xl font-bold text-gray-200">
+              {item ? "Edit item" : "Add new item"}
+            </h1>
             <button className="col-span-1 cursor-pointer hover:bg-gray-200/5 active:bg-gray-500/5 p-1">
               Cancel
             </button>
@@ -55,7 +67,10 @@ export default function AddClothingItem({ onClose }: { onClose: () => void }) {
           <div className="flex justify-evenly gap-4">
             <button
               className="col-span-1 cursor-pointer hover:bg-gray-200/5 active:bg-gray-500/5 p-1"
-              onClick={addNewClothingItem}
+              onClick={() => {
+                buildFormData();
+                onClose();
+              }}
             >
               Save Item
             </button>
@@ -70,23 +85,22 @@ export default function AddClothingItem({ onClose }: { onClose: () => void }) {
         <div className="flex gap-6 p-4">
           {/* Left: Image Upload */}
           <div className="flex flex-col items-center gap-2 shrink-0">
-            <div className="w-48 h-56 flex flex-col items-center justify-center gap-2 rounded-lg bg-gray-900 border-2 border-dashed border-gray-600 text-gray-400 cursor-pointer hover:border-indigo-500 hover:text-indigo-400 transition-colors">
-              {imgPreview ? (
+            <label
+              htmlFor="image-upload"
+              className="relative w-48 h-56 flex flex-col items-center justify-center gap-2 rounded-lg bg-gray-900 border-2 border-dashed border-gray-600 text-gray-400 cursor-pointer hover:border-indigo-500 hover:text-indigo-400 transition-colors"
+            >
+              {imgPreview && (
                 <img
                   src={imgPreview}
-                  className="w-full h-full object-cover rounded-lg"
+                  className="w-full h-full object-cover rounded-lg absolute inset-0"
                   alt="preview"
                 />
-              ) : (
-                <label htmlFor="image-upload">
-                  <span className="text-sm">
-                    {" "}
-                    <Plus size={24} className="ml-7" />
-                    Upload photo
-                  </span>
-                </label>
               )}
-            </div>
+              <Plus size={24} className="relative z-10" />
+              <span className="text-sm relative z-10">
+                {imgPreview ? "Change photo" : "Upload photo"}
+              </span>
+            </label>
             <input
               id="image-upload"
               type="file"
@@ -108,6 +122,7 @@ export default function AddClothingItem({ onClose }: { onClose: () => void }) {
                   name="name"
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Item name"
+                  defaultValue={name}
                   rows={1}
                   className=" resize-none px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
@@ -116,7 +131,7 @@ export default function AddClothingItem({ onClose }: { onClose: () => void }) {
                 <label className="text-sm text-gray-300">Category</label>
                 <select
                   name="category"
-                  defaultValue={"Select"}
+                  defaultValue={categoryName || "Select"}
                   onChange={(e) => setCategoryName(e.target.value)}
                   className="h-12.5 px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
@@ -140,6 +155,7 @@ export default function AddClothingItem({ onClose }: { onClose: () => void }) {
                 name="description"
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Optional description..."
+                defaultValue={description}
                 rows={4}
                 className="px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
               />

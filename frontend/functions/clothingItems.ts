@@ -1,3 +1,47 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+const useClothingItems = (item: ClothingItem | undefined) => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const queryClient = useQueryClient();
+
+  const invalidateQuery = () => {
+    queryClient.invalidateQueries({ queryKey: ["allItems"] });
+  };
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const getItem = useQuery({
+    queryKey: ["oneItem", item?.id],
+    queryFn: async () => {
+      const res = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${item?.id}`,
+        {
+          method: "GET",
+          credentials: "include",
+        },
+      );
+      if (!res.ok) throw new Error("Failed to fetch item");
+      return res.json();
+    },
+    enabled: item !== null,
+  });
+  return {
+    getItem,
+  };
+};
+export { useClothingItems };
+
+export async function addClothingItem(formData: FormData) {
+  const response = await fetch(
+    process.env.NEXT_PUBLIC_API_URL + "/v1/clothing_items/",
+    {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    },
+  );
+  console.log(response);
+  return response;
+}
+
 export async function fetchClothingItems(
   search: string = "",
   category: string = "",
@@ -26,8 +70,7 @@ export async function editClothingItem(id: number, formData: FormData) {
     const res = await fetch(
       process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}/`,
       {
-        headers: { "Content-Type": "application/json" },
-        method: "DELETE",
+        method: "PATCH",
         credentials: "include",
         body: formData,
       },

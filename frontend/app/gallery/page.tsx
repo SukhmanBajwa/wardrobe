@@ -7,7 +7,7 @@ import Link from "next/link";
 import ItemDetail from "@/components/ItemDetail";
 import Logout from "@/components/Logout";
 import { CirclePlus } from "lucide-react";
-import AddClothingItem from "@/components/AddClothingItem";
+import ItemForm from "@/components/ItemForm";
 import { fetchClothingItems } from "@/functions/clothingItems";
 import { fetchCategories } from "@/functions/categories";
 
@@ -18,6 +18,7 @@ export default function Gallery() {
   const [categoryFilter, setCategoryFilter] = useState<string>("All");
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [addItemModalOpen, setAddItemModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [searchParam, setSearchParam] = useState<string>("");
   const [logout, setLogout] = useState(false);
 
@@ -119,7 +120,7 @@ export default function Gallery() {
       </header>
 
       <main>
-        <div className="flex flex-col">
+        <div className="flex flex-col relative">
           <p className="px-3">{clothingItems.length} items</p>
           <div className="flex items-start justify-normal flex-wrap px-4 gap-6 my-6">
             {clothingItems.map((item) => (
@@ -129,6 +130,10 @@ export default function Gallery() {
                 onItemSelect={(item: ClothingItem) => {
                   setSelectedItem(item);
                   setDetailModalOpen(true);
+                }}
+                onEditSelect={(item: ClothingItem) => {
+                  setSelectedItem(item);
+                  setEditModalOpen(true);
                 }}
               />
             ))}
@@ -153,10 +158,17 @@ export default function Gallery() {
                 prev.filter((item) => item.id !== selectedItem.id),
               )
             }
+            onEdit={() => setEditModalOpen(true)}
           />
         )}
         {addItemModalOpen && (
-          <AddClothingItem onClose={() => setAddItemModalOpen(false)} />
+          <ItemForm onClose={() => setAddItemModalOpen(false)} />
+        )}
+        {editModalOpen && (
+          <ItemForm
+            onClose={() => setEditModalOpen(false)}
+            item={selectedItem}
+          />
         )}
       </main>
     </div>
