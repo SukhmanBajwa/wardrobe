@@ -3,6 +3,7 @@ import Image from "next/image";
 import { X, Plus, ImageIcon } from "lucide-react";
 import { addItem } from "@/functions/addItem";
 import { useEffect, useState } from "react";
+import { fetchAvailableCategories } from "@/functions/clothingItems";
 
 export default function AddClothingItem({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState("");
@@ -34,24 +35,12 @@ export default function AddClothingItem({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     const fetchCategories: () => void = async () => {
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + `/v1/categories/`,
-        {
-          method: "GET",
-          credentials: "include",
-        },
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setCategoriesAvailable(data);
-      } else {
-        const errorResponse = await response.json();
-        alert(`Failed to fectch categories: ${errorResponse.error}`);
-      }
+      setCategoriesAvailable(await fetchAvailableCategories());
     };
     fetchCategories();
   }, []);
 
+  const imgPreview = image ? URL.createObjectURL(image) : null;
   return (
     <div className=" modal-container bg-black/50">
       <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 rounded-xl p-6 w-full max-w-3xl max-h-screen overflow-y-auto">
@@ -81,19 +70,31 @@ export default function AddClothingItem({ onClose }: { onClose: () => void }) {
         <div className="flex gap-6 p-4">
           {/* Left: Image Upload */}
           <div className="flex flex-col items-center gap-2 shrink-0">
-            <label
-              htmlFor="image-upload"
-              className="w-48 h-56 flex flex-col items-center justify-center gap-2 rounded-lg bg-gray-900 border-2 border-dashed border-gray-600 text-gray-400 cursor-pointer hover:border-indigo-500 hover:text-indigo-400 transition-colors"
-            >
-              <Plus size={24} />
-              <span className="text-sm">Upload photo</span>
-            </label>
+            <div className="w-48 h-56 flex flex-col items-center justify-center gap-2 rounded-lg bg-gray-900 border-2 border-dashed border-gray-600 text-gray-400 cursor-pointer hover:border-indigo-500 hover:text-indigo-400 transition-colors">
+              {imgPreview ? (
+                <img
+                  src={imgPreview}
+                  className="w-full h-full object-cover rounded-lg"
+                  alt="preview"
+                />
+              ) : (
+                <label htmlFor="image-upload">
+                  <span className="text-sm">
+                    {" "}
+                    <Plus size={24} className="ml-7" />
+                    Upload photo
+                  </span>
+                </label>
+              )}
+            </div>
             <input
               id="image-upload"
               type="file"
               className="hidden"
               accept="image/*"
-              onChange={(e) => setImage(e.target.files?.[0])}
+              onChange={(e) => {
+                setImage(e.target.files?.[0]);
+              }}
             />
             <p className="text-xs text-gray-500">JPG, PNG up to 10MB</p>
           </div>
