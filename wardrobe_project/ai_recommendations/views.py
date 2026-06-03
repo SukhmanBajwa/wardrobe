@@ -65,7 +65,6 @@ def Ai_Recommendations(item_info, inventory_data):
     cleaned_response = "".join(
         response_text_split[first_curly_index : last_curly_index + 1]
     )
-    print("cleaned res ---------------" + cleaned_response)
 
     try:
         return (json.loads(cleaned_response), status.HTTP_200_OK)
@@ -101,25 +100,26 @@ class RecommendationsAPIView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AiRecommendationsSerilizer
 
-    def get(self, request, id=None):
-        if id:
-            item = get_object_or_404(ClothingItem, id=id)
+    def get(self, request, item_id=None):
+        if item_id:
+            item = get_object_or_404(ClothingItem, id=item_id)
             if item.recommendations.exists():
-                recommendations = item.recommendations.all()
-                return Response(
-                    AiRecommendationsSerilizer(recommendations, many=True).data,
-                    status=status.HTTP_200_OK,
+                recommendations = item.recommendations.filter(
+                    recommended_item__is_deleted=False
                 )
+                if recommendations:
+                    return Response(
+                        AiRecommendationsSerilizer(recommendations, many=True).data,
+                        status=status.HTTP_200_OK,
+                    )
             serializer = ClothingItemSerializer(item)
             item_info = serializer.data
-            print(item_info)
 
             inventory = ClothingItem.objects.filter(user=request.user).filter(
                 is_deleted=False
             )
             inventory_serializer = ClothingItemSerializer(inventory, many=True)
             inventory_data = inventory_serializer.data
-            print(f"inventory data ------------ {inventory_data}")
 
             ai_reply, response_status = Ai_Recommendations(item_info, inventory_data)
             Save_Ai_Recommendations(item_info["id"], ai_reply)

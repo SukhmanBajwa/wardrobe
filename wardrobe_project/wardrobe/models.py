@@ -19,14 +19,6 @@ class Category(models.Model):
 
 class ClothingItem(models.Model):
 
-    # CATEGORY_CHOICES = [
-    #     ("tops", "Tops"),
-    #     ("bottoms", "Bottoms"),
-    #     ("shoes", "Shoes"),
-    #     ("outerwear", "Outerwear"),
-    #     ("accessories", "Accessories"),
-    # ]
-
     name = models.CharField(max_length=30)
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True, blank=True
