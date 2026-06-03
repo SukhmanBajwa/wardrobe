@@ -1,5 +1,4 @@
 export async function sendLogin(username: string, password: string) {
-  console.log("Sending login data:");
   const res = await fetch(
     process.env.NEXT_PUBLIC_API_URL + "/api/auth/login/",
     {

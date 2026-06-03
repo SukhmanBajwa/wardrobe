@@ -29,7 +29,6 @@ export default function ItemDetail({
       );
       if (res.ok) {
         setAiRecommendations(await res.json());
-        console.log(aiRecommendations);
       } else {
         const data = await res.json();
         alert(`Failed to fetch recommendations: ${JSON.stringify(data)}`);

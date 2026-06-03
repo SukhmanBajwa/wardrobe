@@ -30,7 +30,6 @@ export default function ItemForm({
       alert("Please select a category");
       return;
     }
-    console.log(categoryName);
     formData.append("name", name);
     formData.append("category_name", categoryName);
     formData.append("description", description);

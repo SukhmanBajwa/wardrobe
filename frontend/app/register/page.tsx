@@ -38,7 +38,6 @@ export default function Register() {
     password1: string,
     password2: string,
   ) {
-    console.log("Sending registration data:");
     const res = await fetch(
       process.env.NEXT_PUBLIC_API_URL + "/api/auth/registration/",
       {
@@ -92,7 +91,6 @@ export default function Register() {
           <form
             className="flex flex-col gap-5"
             onSubmit={async (e) => {
-              console.log("form submitted");
               e.preventDefault();
               await sendRegisteration(username, email, password1, password2);
             }}

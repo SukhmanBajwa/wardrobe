@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { SearchCheck } from "lucide-react";
 
 const useClothingItems = (item: ClothingItem | undefined) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -38,7 +39,6 @@ export async function addClothingItem(formData: FormData) {
       body: formData,
     },
   );
-  console.log(response);
   return response;
 }
 
@@ -47,7 +47,11 @@ export async function fetchClothingItems(
   category: string = "",
 ) {
   const categoryParam = category ? `?category=${category}` : "";
-  const searchParam = search ? (category ? `&search=${search}` : "") : "";
+  const searchParam = search
+    ? category
+      ? `&search=${search}`
+      : `?search=${search}`
+    : "";
   try {
     const res = await fetch(
       process.env.NEXT_PUBLIC_API_URL +
