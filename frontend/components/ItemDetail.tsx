@@ -28,7 +28,10 @@ export default function ItemDetail({
         },
       );
       if (res.ok) {
-        setAiRecommendations(await res.json());
+        const data = await res.json();
+        if (data.length === 0)
+          throw new Error(`No recommendations found for ${id}`);
+        setAiRecommendations(data);
       } else {
         const data = await res.json();
         alert(`Failed to fetch recommendations: ${JSON.stringify(data)}`);

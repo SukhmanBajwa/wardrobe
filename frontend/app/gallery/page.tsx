@@ -88,7 +88,7 @@ export default function Gallery() {
           </button>
           {logout && <Logout></Logout>}
         </div>
-        <div className="flex flex-row justify-between items-center">
+        <div className="flex flex-col lg:flex-row justify-between items-center">
           <div className="pt-3">
             <ul>
               {categories.map((category) => (
@@ -113,7 +113,7 @@ export default function Gallery() {
               value={searchParam}
               placeholder="Search: Name, Description or Tags"
               onChange={(e) => setSearchParam(e.target.value)}
-              className="w-[30vw] focus:w-[50vw] hover:w-[50vw] transition-all duration-300 resize-none px-4 py-3 rounded-3xl bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="lg:w-[30vw] sm:w-full md:w-full focus:w-[50vw] hover:w-[50vw] transition-all duration-300 resize-none px-4 py-3 rounded-3xl bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
         </div>

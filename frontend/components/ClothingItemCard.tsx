@@ -11,7 +11,7 @@ export default function ClothingItemCard({
   const { name, image_url, tags, description, category } = item;
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
   return (
-    <div className="relative">
+    <div className="relative sm:w-full md:w-59">
       <div className="absolute top-2 right-2 z-10 mix-blend-difference text-white cursor-pointer rounded-2xl hover:bg-green-900 p-1 border-0 hover:border hover:scale-110 transition ease-in-out duration-300">
         <Pencil size={20} onClick={() => onEditSelect(item)} />
       </div>
@@ -45,7 +45,7 @@ export default function ClothingItemCard({
           )}
         </div>
         <div className="flex flex-col justify-between items-start px-2.5 py-3 gap-y-1">
-          <h2 className="pt-1 text-sm">{name}</h2>
+          <h2 className="pt-1 text-sm">{capitalize(name)}</h2>
           {!!category && (
             <p className="border px-2 py-0.5 rounded-2xl w-fit bg-indigo-600/50 border-gray-500 text-indigo-200 text-xs font-light">
               {capitalize(category)}
