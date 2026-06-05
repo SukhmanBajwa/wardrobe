@@ -5,6 +5,7 @@ from .permissions import IsOwner
 from .serializers import ClothingItemSerializer, CategoriesSerializer
 from .models import ClothingItem, Category
 from rest_framework import filters
+from ai_recommendations import services
 
 # Create your views here.
 
@@ -20,7 +21,7 @@ class ClothingItemViewSet(viewsets.ModelViewSet):
         category = self.request.query_params.get("category")
 
         # pylint: disable=no-member
-        queryset = ClothingItem.objects.filter(user=user).filter(is_deleted=False)
+        queryset = ClothingItem.objects.filter(user=user, is_deleted=False)
 
         if category:
             queryset = queryset.filter(category__name=category)
@@ -29,7 +30,13 @@ class ClothingItemViewSet(viewsets.ModelViewSet):
     # method override from CreateModelMixin to change the behaviour of save. Include user info
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        new_item = serializer.save(user=self.request.user)
+        item_info = ClothingItemSerializer(new_item).data
+        inventory_data = ClothingItemSerializer(self.get_queryset(), many=True).data
+        ai_reply, response_status = services.Ai_Recommendation(
+            item_info, inventory_data
+        )
+        services.Save_Ai_Recommendations(new_item.id, ai_reply)
 
     # method override from DestroyModelMixin to change behaviour to mark object "is_delete: True"
     def perform_destroy(self, instance):
