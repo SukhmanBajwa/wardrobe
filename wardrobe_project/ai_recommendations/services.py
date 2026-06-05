@@ -60,6 +60,7 @@ def Ai_Recommendation(item_info, inventory_data):
     )
 
     try:
+        print(cleaned_response)
         return (json.loads(cleaned_response), status.HTTP_200_OK)
 
     except json.JSONDecodeError:

@@ -71,14 +71,36 @@ export async function fetchClothingItems(
 
 export async function editClothingItem(id: number, formData: FormData) {
   try {
+    let bodyData: FormData | Record<string, string> = {};
+    if (formData.has("image")) {
+      bodyData = formData;
+    } else {
+      for (let [key, value] of formData.entries()) {
+        // "bodyData as" | "value as" means trust me bro they are this type for now. Just to make compiler to stop complaining.
+        (bodyData as Record<string, string>)[key] = value as string;
+      }
+    }
+    console.log("has image:", formData.has("image"));
+    console.log("formData entries:");
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+    console.log("bodyData:", bodyData);
     const res = await fetch(
       process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}/`,
       {
         method: "PATCH",
         credentials: "include",
-        body: formData,
+        headers: formData.has("image")
+          ? undefined
+          : { "Content-Type": "application/json" },
+        body: formData.has("image")
+          ? (bodyData as FormData)
+          : JSON.stringify(bodyData),
       },
     );
+    console.log("status:", res.status);
+    console.log("response:", await res.json());
     if (!res.ok) {
       throw new Error("HTTP error! Status: ${res.status}");
     }

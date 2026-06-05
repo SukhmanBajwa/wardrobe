@@ -30,15 +30,25 @@ export default function ItemForm({
       alert("Please select a category");
       return;
     }
-    formData.append("name", name);
-    formData.append("category_name", categoryName);
-    formData.append("description", description);
-    formData.append("image", image);
 
+    if (name !== item?.name) formData.append("name", name);
+    if (description !== item?.description)
+      formData.append("description", description);
+    if (categoryName !== item?.category)
+      formData.append("category_name", categoryName);
+    if (image !== item?.image) formData.append("image", image as Blob);
+
+    if (!item) {
+      await addClothingItem(formData);
+    }
+    if ([...formData.entries()].length === 0) return;
     if (item) {
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
       await editClothingItem(item.id, formData);
     }
-    await addClothingItem(formData);
   };
 
   useEffect(() => {
@@ -46,6 +56,7 @@ export default function ItemForm({
       setCategoriesAvailable(await fetchAvailableCategories());
     };
     fetchCategories();
+    console.log(categoryName);
   }, []);
 
   const imgPreview =
@@ -134,8 +145,8 @@ export default function ItemForm({
                   onChange={(e) => setCategoryName(e.target.value)}
                   className="h-12.5 px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
-                  <option value="Select" disabled>
-                    Select category
+                  <option value={item ? `${categoryName}` : "Select"} disabled>
+                    {item ? `${capitalize(categoryName)}` : "Select"}
                   </option>
                   {categoriesAvailable &&
                     categoriesAvailable.map((category) => (

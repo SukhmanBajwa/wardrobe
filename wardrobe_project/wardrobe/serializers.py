@@ -34,6 +34,21 @@ class ClothingItemSerializer(serializers.ModelSerializer):
         category = Category.objects.get(name=category_name) if category_name else None
         return ClothingItem.objects.create(category=category, **validated_data)
 
+    def update(self, instance, validated_data):
+        print("UPDATE CALLED")
+        print("validated_data:", validated_data)
+        print("instance before:", instance.name, instance.category)
+        category_name = validated_data.pop("category_name", None)
+        if category_name:
+            instance.category = Category.objects.get(name=category_name)
+
+        instance.name = validated_data.get("name", instance.name)
+        instance.description = validated_data.get("description", instance.description)
+        instance.image = validated_data.get("image", instance.image)
+
+        instance.save()
+        return instance
+
     class Meta:
         model = ClothingItem
 
