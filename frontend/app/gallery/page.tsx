@@ -1,19 +1,17 @@
 "use client";
 import ClothingItemCard from "@/components/ClothingItemCard";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import Image from "next/image";
 import Link from "next/link";
 import ItemDetail from "@/components/ItemDetail";
 import Logout from "@/components/Logout";
 import { CirclePlus } from "lucide-react";
 import ItemForm from "@/components/ItemForm";
-import { fetchClothingItems } from "@/functions/clothingItems";
-import { fetchCategories } from "@/functions/categories";
+import { useClothingItems } from "@/functions/clothingItems";
+import { get } from "http";
 
 export default function Gallery() {
-  const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>("All");
   const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -23,50 +21,16 @@ export default function Gallery() {
   const [logout, setLogout] = useState(false);
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-  const router = useRouter();
 
-  useEffect(() => {
-    // Fetching items with search and filter parameters
-    const fetchItems = async () => {
-      const res: Response = await fetchClothingItems(
-        searchParam || "",
-        categoryFilter ? (categoryFilter == "All" ? "" : categoryFilter) : "",
-      );
-      if (res.ok) {
-        setClothingItems(await res.json());
+  const { getAllItems, getCategories } = useClothingItems({
+    search: searchParam,
+    category: categoryFilter === "All" ? "" : categoryFilter,
+  });
 
-        // fetching all categories
-        const categoryFetchResponse: Response = await fetchCategories();
-
-        if (categoryFetchResponse.ok) {
-          const categoriesArray: string[] = await categoryFetchResponse.json();
-          setCategories([
-            "All",
-            ...new Set<string>(
-              categoriesArray.map((category) => category["name"]),
-            ),
-          ]);
-        } else {
-          const data = await categoryFetchResponse.json();
-          console.error(`Failed to fetch categories: ${JSON.stringify(data)}`);
-        }
-      } else if (res.status == 401) {
-        router.push("/login");
-      } else {
-        const data = await res.json();
-        console.error(
-          `Failed to fetch clothing items: ${JSON.stringify(data)}`,
-        );
-      }
-    };
-    const timer = setTimeout(
-      () => {
-        fetchItems();
-      },
-      searchParam ? 300 : 0,
-    );
-    return () => clearTimeout(timer);
-  }, [searchParam, categoryFilter]);
+  const clothingItems = getAllItems.data ?? [];
+  const categoriesAvailable = getCategories.data
+    ? [{ id: 0, name: "All" }, ...getCategories.data]
+    : [{ id: 0, name: "All" }];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6">
@@ -91,20 +55,23 @@ export default function Gallery() {
         <div className="flex flex-col lg:flex-row justify-between items-center">
           <div className="pt-3">
             <ul>
-              {categories.map((category) => (
-                <li
-                  key={category}
-                  className="inline-block cursor-pointer text-white text-xs font-light border border-gray-500 px-3 py-1 rounded-full mr-2 mb-2  active:bg-indigo-500 focus:bg-indigo-500"
-                  onClick={() => {
-                    setCategoryFilter(category);
-                    if (category == "All" && searchParam) {
-                      setSearchParam("");
-                    }
-                  }}
-                >
-                  {capitalize(category)}
-                </li>
-              ))}
+              {categoriesAvailable &&
+                categoriesAvailable.map(
+                  (category: { id: number; name: string }) => (
+                    <li
+                      key={category.id}
+                      className="inline-block cursor-pointer text-white text-xs font-light border border-gray-500 px-3 py-1 rounded-full mr-2 mb-2  active:bg-indigo-500 focus:bg-indigo-500"
+                      onClick={() => {
+                        setCategoryFilter(category.name);
+                        if (category.name == "All" && searchParam) {
+                          setSearchParam("");
+                        }
+                      }}
+                    >
+                      {capitalize(category.name)}
+                    </li>
+                  ),
+                )}
             </ul>
           </div>
           <div>
@@ -112,7 +79,10 @@ export default function Gallery() {
               id="search"
               value={searchParam}
               placeholder="Search: Name, Description or Tags"
-              onChange={(e) => setSearchParam(e.target.value)}
+              onChange={(e) => {
+                setSearchParam(e.target.value);
+                console.log("fired onchange search bar");
+              }}
               className="lg:w-[30vw] sm:w-full md:w-full focus:w-[50vw] hover:w-[50vw] transition-all duration-300 resize-none px-4 py-3 rounded-3xl bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
@@ -123,7 +93,7 @@ export default function Gallery() {
         <div className="flex flex-col relative">
           <p className="px-3">{clothingItems.length} items</p>
           <div className="flex items-start justify-normal flex-wrap px-4 gap-6 my-6">
-            {clothingItems.map((item) => (
+            {clothingItems.map((item: ClothingItem) => (
               <ClothingItemCard
                 key={item.id}
                 item={item}
@@ -153,11 +123,7 @@ export default function Gallery() {
             onClose={() => {
               setDetailModalOpen(false);
             }}
-            onDelete={() =>
-              setClothingItems((prev) =>
-                prev.filter((item) => item.id !== selectedItem.id),
-              )
-            }
+            onDelete={() => setDetailModalOpen(false)}
             onEdit={() => setEditModalOpen(true)}
           />
         )}

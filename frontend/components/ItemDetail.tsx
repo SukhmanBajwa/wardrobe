@@ -1,8 +1,8 @@
 import "./ItemDetail.css";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { deleteClothingItem } from "@/functions/clothingItems";
+import { useClothingItems } from "@/functions/clothingItems";
+import { useAiRecommendations } from "@/functions/aiRecommendations";
 
 export default function ItemDetail({
   item,
@@ -16,30 +16,9 @@ export default function ItemDetail({
   onEdit?: () => void;
 }) {
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-  const [aiRecommendations, setAiRecommendations] = useState();
-
-  useEffect(() => {
-    const fetchAiRecommendations = async (id: number) => {
-      const res = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + `/v1/ai/ai_req/${id}`,
-        {
-          method: "GET",
-          credentials: "include",
-        },
-      );
-      if (res.ok) {
-        const data = await res.json();
-        if (data.length === 0)
-          throw new Error(`No recommendations found for ${id}`);
-        setAiRecommendations(data);
-      } else {
-        const data = await res.json();
-        alert(`Failed to fetch recommendations: ${JSON.stringify(data)}`);
-      }
-    };
-    fetchAiRecommendations(item.id);
-  }, []);
-
+  const { deleteClothingItem } = useClothingItems({});
+  const { getAiRecommendation } = useAiRecommendations(item.id);
+  const aiRecommendation = getAiRecommendation.data;
   return (
     <div className=" modal-container bg-black/50 absolute z-20">
       <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 rounded-xl p-6 w-full max-w-3xl max-h-screen overflow-y-auto">
@@ -63,8 +42,8 @@ export default function ItemDetail({
             </button>
             <button
               className="col-span-1 cursor-pointer hover:bg-gray-200/5 active:bg-gray-500/5 p-1"
-              onClick={() => {
-                deleteClothingItem(item.id);
+              onClick={async () => {
+                await deleteClothingItem.mutateAsync(item.id);
                 onDelete();
                 onClose();
               }}
@@ -111,8 +90,8 @@ export default function ItemDetail({
           </div>
           <div className="recommendations w-1/2">
             <h2 className="text-white font-bold mb-2">Pairs well with</h2>
-            {aiRecommendations &&
-              aiRecommendations.map((rec: AiRecommendation, index: number) => (
+            {aiRecommendation &&
+              aiRecommendation.map((rec: AiRecommendation, index: number) => (
                 <div
                   key={index}
                   className="recommendation-card flex flex-row gap-3"

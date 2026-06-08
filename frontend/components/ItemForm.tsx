@@ -1,6 +1,6 @@
 "use client";
-import { X, Plus } from "lucide-react";
-import { addClothingItem, editClothingItem } from "@/functions/clothingItems";
+import { X, Plus, Form } from "lucide-react";
+import { useClothingItems } from "@/functions/clothingItems";
 import { useEffect, useState } from "react";
 import { fetchAvailableCategories } from "@/functions/clothingItems";
 
@@ -15,13 +15,19 @@ export default function ItemForm({
   const [description, setDescription] = useState(item?.description ?? "");
   const [image, setImage] = useState((item?.image ?? null) || undefined);
   const [categoryName, setCategoryName] = useState(item?.category ?? "");
-  const [categoriesAvailable, setCategoriesAvailable] = useState<
-    { id: number; name: string }[]
-  >([]);
+
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const formData = new FormData();
+
+  const { editClothingItem, addClothingItem, getCategories } = useClothingItems(
+    {
+      item: item,
+    },
+  );
+
+  const categoriesAvailable = getCategories.data;
 
   const buildFormData: () => void = async () => {
-    const formData = new FormData();
     if (!categoryName) {
       alert("Please select a category");
       return;
@@ -39,25 +45,13 @@ export default function ItemForm({
     if (image !== item?.image) formData.append("image", image as Blob);
 
     if (!item) {
-      await addClothingItem(formData);
+      await addClothingItem.mutateAsync(formData);
     }
     if ([...formData.entries()].length === 0) return;
     if (item) {
-      for (let [key, value] of formData.entries()) {
-        console.log(key, value);
-      }
-
-      await editClothingItem(item.id, formData);
+      await editClothingItem.mutateAsync({ id: item.id, formData: formData });
     }
   };
-
-  useEffect(() => {
-    const fetchCategories: () => void = async () => {
-      setCategoriesAvailable(await fetchAvailableCategories());
-    };
-    fetchCategories();
-    console.log(categoryName);
-  }, []);
 
   const imgPreview =
     image instanceof File ? URL.createObjectURL(image) : (image ?? null);
@@ -134,6 +128,7 @@ export default function ItemForm({
                   placeholder="Item name"
                   defaultValue={name}
                   rows={1}
+                  maxLength={30}
                   className=" resize-none px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
@@ -167,6 +162,7 @@ export default function ItemForm({
                 placeholder="Optional description..."
                 defaultValue={description}
                 rows={4}
+                maxLength={100}
                 className="px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
               />
             </div>

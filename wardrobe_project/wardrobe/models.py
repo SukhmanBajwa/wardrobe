@@ -24,7 +24,7 @@ class ClothingItem(models.Model):
         Category, on_delete=models.SET_NULL, null=True, blank=True
     )
     description = models.TextField(null=True, blank=True)
-    image = models.ImageField(upload_to="clothing/", blank=True)
+    image = models.ImageField(upload_to="clothing/", blank=True, max_length=500)
     # image_url = models.URLField(null=True, blank=True)
     user = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name="user_clothes"

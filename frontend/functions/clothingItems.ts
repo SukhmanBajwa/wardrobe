@@ -1,36 +1,116 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { SearchCheck } from "lucide-react";
 
-const useClothingItems = (item: ClothingItem | undefined) => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+// Hook
+
+const useClothingItems = ({
+  item,
+  search,
+  category,
+}: {
+  item?: ClothingItem | null | undefined;
+  search?: string | null | undefined;
+  category?: string | null | undefined;
+}) => {
   const queryClient = useQueryClient();
 
-  const invalidateQuery = () => {
-    queryClient.invalidateQueries({ queryKey: ["allItems"] });
+  // Invlidation
+  const invalidateClothingItem_s = (id: number | null | undefined) => {
+    queryClient.invalidateQueries({
+      queryKey: ["clothingItems"],
+    });
+    if (id) {
+      queryClient.invalidateQueries({ queryKey: ["clothingItem", item?.id] });
+    }
   };
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+
+  // Get
   const getItem = useQuery({
-    queryKey: ["oneItem", item?.id],
+    queryKey: ["clothingItem", item?.id],
     queryFn: async () => {
-      const res = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${item?.id}`,
-        {
-          method: "GET",
-          credentials: "include",
-        },
-      );
-      if (!res.ok) throw new Error("Failed to fetch item");
-      return res.json();
+      return await getClothingItem(item!.id);
     },
-    enabled: item !== null,
   });
+
+  const getAllItems = useQuery({
+    queryKey: ["clothingItems", search, category],
+    queryFn: async () => {
+      return await getClothingItems(search, category);
+    },
+  });
+
+  // Add
+  const addClothingItem = useMutation({
+    mutationFn: async (formData: FormData) => {
+      await addClothingItemFn(formData!);
+    },
+    onSettled: () => {
+      invalidateClothingItem_s(null);
+    },
+  });
+
+  // Edit
+  const editClothingItem = useMutation({
+    mutationFn: async ({
+      id,
+      formData,
+    }: {
+      id: number;
+      formData: FormData;
+    }) => {
+      await editClothingItemFn(id, formData);
+    },
+    onSuccess: (_, variables) => {
+      invalidateClothingItem_s(variables.id);
+    },
+  });
+
+  //Soft Delete
+  const deleteClothingItem = useMutation({
+    mutationFn: async (id: number) => {
+      console.log(id);
+      return await deleteClothingItemFn(id);
+    },
+    onMutate: async (deletedItem) => {
+      await queryClient.cancelQueries({ queryKey: ["clothingItems"] });
+
+      const previousItems = queryClient.getQueryData(["clothingItems"]);
+
+      queryClient.setQueryData(["clothingItems"], (old: ClothingItem[]) => {
+        if (!old) return old;
+        return old.filter((item) => item.id !== deletedItem.id);
+      });
+
+      return { previousItems };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(["clothingItems"], context?.previousItems);
+    },
+    onSettled: (data, error, variables) => {
+      invalidateClothingItem_s(null);
+    },
+  });
+
+  // Get categories
+  const getCategories = useQuery({
+    queryKey: ["allCategories"],
+    queryFn: async () => {
+      return await fetchAvailableCategoriesFn();
+    },
+  });
+
   return {
     getItem,
+    getAllItems,
+    editClothingItem,
+    addClothingItem,
+    deleteClothingItem,
+    getCategories,
   };
 };
 export { useClothingItems };
 
-export async function addClothingItem(formData: FormData) {
+// Helper functions
+async function addClothingItemFn(formData: FormData) {
   const response = await fetch(
     process.env.NEXT_PUBLIC_API_URL + "/v1/clothing_items/",
     {
@@ -42,9 +122,9 @@ export async function addClothingItem(formData: FormData) {
   return response;
 }
 
-export async function fetchClothingItems(
-  search: string = "",
-  category: string = "",
+async function getClothingItems(
+  search: string | null | undefined,
+  category: string | null | undefined,
 ) {
   const categoryParam = category ? `?category=${category}` : "";
   const searchParam = search
@@ -63,13 +143,25 @@ export async function fetchClothingItems(
         credentials: "include",
       },
     );
-    return res;
+    return await res.json();
   } catch (error) {
     console.error("Error fetching items:", error);
   }
 }
 
-export async function editClothingItem(id: number, formData: FormData) {
+async function getClothingItem(id: number) {
+  const res = await fetch(
+    process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+  if (!res.ok) throw new Error("Failed to fetch item");
+  return res.json();
+}
+
+async function editClothingItemFn(id: number, formData: FormData) {
   try {
     let bodyData: FormData | Record<string, string> = {};
     if (formData.has("image")) {
@@ -80,12 +172,6 @@ export async function editClothingItem(id: number, formData: FormData) {
         (bodyData as Record<string, string>)[key] = value as string;
       }
     }
-    console.log("has image:", formData.has("image"));
-    console.log("formData entries:");
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
-    console.log("bodyData:", bodyData);
     const res = await fetch(
       process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}/`,
       {
@@ -99,19 +185,17 @@ export async function editClothingItem(id: number, formData: FormData) {
           : JSON.stringify(bodyData),
       },
     );
-    console.log("status:", res.status);
-    console.log("response:", await res.json());
     if (!res.ok) {
-      throw new Error("HTTP error! Status: ${res.status}");
+      throw new Error(`HTTP error! Status: ${res.status}`);
     }
-    return true;
+    return res.json();
   } catch (error) {
     console.error("Error editing item:", error);
   }
 }
 
 // Soft delete — sends DELETE request, backend sets is_deleted=True instead of removing the record
-export async function deleteClothingItem(id: number) {
+async function deleteClothingItemFn(id: number) {
   try {
     const res = await fetch(
       process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}/`,
@@ -124,14 +208,14 @@ export async function deleteClothingItem(id: number) {
     if (!res.ok) {
       throw new Error("HTTP error! Status: ${res.status}");
     }
-    return true;
+    return res;
   } catch (error) {
     console.error("Error deleting item:", error);
   }
 }
 
 // fetch available categories.
-export async function fetchAvailableCategories() {
+async function fetchAvailableCategoriesFn() {
   const response = await fetch(
     process.env.NEXT_PUBLIC_API_URL + `/v1/categories/`,
     {
@@ -140,7 +224,8 @@ export async function fetchAvailableCategories() {
     },
   );
   if (response.ok) {
-    return await response.json();
+    const data = await response.json();
+    return data;
   } else {
     const errorResponse = await response.json();
     alert(`Failed to fectch categories: ${errorResponse.error}`);
