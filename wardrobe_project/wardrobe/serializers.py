@@ -1,6 +1,8 @@
+import json
+
 from rest_framework import serializers
 
-from .models import ClothingItem, Category
+from .models import ClothingItem, Category, ClothingItemTag, Tag
 
 
 class ClothingItemSerializer(serializers.ModelSerializer):
@@ -11,6 +13,7 @@ class ClothingItemSerializer(serializers.ModelSerializer):
         write_only=True, required=False
     )  # This will accept the name of category white POST
     tags = serializers.SerializerMethodField()
+    new_tags = serializers.CharField(write_only=True, required=False)
     image_url = serializers.SerializerMethodField()
 
     def get_image_url(self, obj):
@@ -19,7 +22,7 @@ class ClothingItemSerializer(serializers.ModelSerializer):
         return None
 
     def get_tags(self, obj):
-        rows = obj.item.all()
+        rows = obj.tagged_item.all()
         return [row.tag.name for row in rows]
 
     def validate_category_name(self, value):
@@ -39,8 +42,21 @@ class ClothingItemSerializer(serializers.ModelSerializer):
         print("validated_data:", validated_data)
         print("instance before:", instance.name, instance.category)
         category_name = validated_data.pop("category_name", None)
+        new_tags_json = validated_data.pop("new_tags", None)
+        new_tags_loaded = json.loads(new_tags_json) if new_tags_json else None
+        print(new_tags_loaded)
+
         if category_name:
             instance.category = Category.objects.get(name=category_name)
+
+        if new_tags_loaded is not None:
+            current_tags = instance.tagged_item.all()
+            for tag in new_tags_loaded:
+                if tag not in current_tags:
+                    newly_created_tag, _ = Tag.objects.get_or_create(
+                        name=tag, user=instance.user, defaults={"source": "user"}
+                    )
+                    ClothingItemTag.objects.create(item=instance, tag=newly_created_tag)
 
         instance.name = validated_data.get("name", instance.name)
         instance.description = validated_data.get("description", instance.description)
@@ -62,6 +78,7 @@ class ClothingItemSerializer(serializers.ModelSerializer):
             "image_url",
             "user",
             "tags",
+            "new_tags",
         ]
         read_only_fields = ["user"]
         write_only_fields = ["is_deleted"]

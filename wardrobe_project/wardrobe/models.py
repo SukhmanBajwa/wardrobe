@@ -41,6 +41,12 @@ class Tag(models.Model):
     name = models.CharField(max_length=10)
     source = models.CharField(choices=SOURCE_CHOICES)
     colour_hex = models.CharField(max_length=7, null=True, blank=True)
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="user_tags"
+    )
+
+    class Meta:
+        unique_together = ["name", "user"]
 
     def __str__(self):
         return f"{self.name}"
@@ -49,7 +55,7 @@ class Tag(models.Model):
 class ClothingItemTag(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name="item_tag")
     item = models.ForeignKey(
-        ClothingItem, on_delete=models.CASCADE, related_name="item"
+        ClothingItem, on_delete=models.CASCADE, related_name="tagged_item"
     )
 
     def __str__(self):

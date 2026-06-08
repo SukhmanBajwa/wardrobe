@@ -1,8 +1,10 @@
 "use client";
-import { X, Plus, Form } from "lucide-react";
+import { X, Plus, Trash2 } from "lucide-react";
 import { useClothingItems } from "@/functions/clothingItems";
 import { useEffect, useState } from "react";
 import { fetchAvailableCategories } from "@/functions/clothingItems";
+import { setDefaultAutoSelectFamily } from "net";
+import { Tagesschrift } from "next/font/google";
 
 export default function ItemForm({
   onClose,
@@ -15,6 +17,8 @@ export default function ItemForm({
   const [description, setDescription] = useState(item?.description ?? "");
   const [image, setImage] = useState((item?.image ?? null) || undefined);
   const [categoryName, setCategoryName] = useState(item?.category ?? "");
+  const [tags, setTags] = useState<string[]>(item?.tags ?? []);
+  const [tagInput, setTagInput] = useState("");
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
   const formData = new FormData();
@@ -38,6 +42,7 @@ export default function ItemForm({
     }
 
     if (name !== item?.name) formData.append("name", name);
+    if (tags !== item?.tags) formData.append("new_tags", JSON.stringify(tags));
     if (description !== item?.description)
       formData.append("description", description);
     if (categoryName !== item?.category)
@@ -115,6 +120,22 @@ export default function ItemForm({
               }}
             />
             <p className="text-xs text-gray-500">JPG, PNG up to 10MB</p>
+            <p>
+              {tags &&
+                tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center border rounded-2xl px-2 gap-1 font-light text-sm text-gray-400 mr-2"
+                  >
+                    <Trash2
+                      size={15}
+                      className="hover:text-red-600"
+                      onClick={() => setTags(tags.filter((t) => t !== tag))}
+                    />
+                    #{tag}
+                  </span>
+                ))}
+            </p>
           </div>
 
           <div className="flex flex-col gap-4 flex-1">
@@ -151,6 +172,25 @@ export default function ItemForm({
                     ))}
                 </select>
               </div>
+            </div>
+            {/* Tags */}
+            <div className="flex flex-col gap-1">
+              <label className="text-sm text-gray-300">Tags</label>
+              <input
+                name="tags"
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    setTags([...tags, tagInput]);
+                    setTagInput("");
+                  }
+                }}
+                maxLength={10}
+                placeholder="#Tags"
+                value={tagInput ? tagInput : ""}
+                className="h-12.5 px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              ></input>
             </div>
 
             {/* Description */}
