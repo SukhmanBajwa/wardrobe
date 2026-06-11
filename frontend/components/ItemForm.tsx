@@ -2,9 +2,6 @@
 import { X, Plus, Trash2 } from "lucide-react";
 import { useClothingItems } from "@/functions/clothingItems";
 import { useEffect, useState } from "react";
-import { fetchAvailableCategories } from "@/functions/clothingItems";
-import { setDefaultAutoSelectFamily } from "net";
-import { Tagesschrift } from "next/font/google";
 
 export default function ItemForm({
   onClose,
@@ -28,6 +25,13 @@ export default function ItemForm({
       item: item,
     },
   );
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
 
   const categoriesAvailable = getCategories.data;
 
@@ -62,7 +66,7 @@ export default function ItemForm({
     image instanceof File ? URL.createObjectURL(image) : (image ?? null);
   return (
     <div className=" absolute modal-container bg-black/50 z-20">
-      <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 rounded-xl p-6 w-full max-w-3xl max-h-screen overflow-y-auto ">
+      <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 rounded-xl p-6 w-full max-w-5xl min-h-auto max-h-screen overflow-y-auto ">
         <div className="modal-header flex justify-between">
           <div className="flex justify-evenly gap-9">
             <h1 className="text-2xl font-bold text-gray-200">
@@ -93,10 +97,10 @@ export default function ItemForm({
         <hr className="border-gray-600 "></hr>
         <div className="flex gap-6 p-4">
           {/* Left: Image Upload */}
-          <div className="flex flex-col items-center gap-2 shrink-0">
+          <div className="flex flex-col items-center w-72 h-84 gap-2 shrink-0">
             <label
               htmlFor="image-upload"
-              className="relative w-48 h-56 flex flex-col items-center justify-center gap-2 rounded-lg bg-gray-900 border-2 border-dashed border-gray-600 text-gray-400 cursor-pointer hover:border-indigo-500 hover:text-indigo-400 transition-colors"
+              className="relative w-56 h-72 flex-shrink-0 flex flex-col items-center justify-center gap-2 rounded-lg bg-gray-900 border-2 border-dashed border-gray-600 text-gray-400 cursor-pointer hover:border-indigo-500 hover:text-indigo-400 transition-colors"
             >
               {imgPreview && (
                 <img
@@ -120,22 +124,22 @@ export default function ItemForm({
               }}
             />
             <p className="text-xs text-gray-500">JPG, PNG up to 10MB</p>
-            <p>
+            <div className="grid grid-cols-3 gap-1 mt-2">
               {tags &&
-                tags.map((tag) => (
+                tags.map((tag, index) => (
                   <span
-                    key={tag}
-                    className="inline-flex items-center border rounded-2xl px-2 gap-1 font-light text-sm text-gray-400 mr-2"
+                    key={index}
+                    className="inline-flex items-center border-2 min-w-0 rounded-2xl px-2 py-1 gap-1 text-xs font-light text-gray-400 overflow-hidden"
                   >
                     <Trash2
                       size={15}
-                      className="hover:text-red-600"
+                      className="hover:text-red-600 shrink-0"
                       onClick={() => setTags(tags.filter((t) => t !== tag))}
                     />
-                    #{tag}
+                    <span className="truncate">#{tag}</span>
                   </span>
                 ))}
-            </p>
+            </div>
           </div>
 
           <div className="flex flex-col gap-4 flex-1">

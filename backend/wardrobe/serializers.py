@@ -32,31 +32,35 @@ class ClothingItemSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def handle_tags(self, item, new_tags_json):
+        ###Creates tags and links them to the item"""
+        if not new_tags_json:
+            return
+        for tag_name in json.loads(new_tags_json):
+            tag, _ = Tag.objects.get_or_create(
+                name=tag_name, user=item.user, defaults={"source": "user"}
+            )
+            ClothingItemTag.objects.get_or_create(item=item, tag=tag)
+
     def create(self, validated_data):
         category_name = validated_data.pop("category_name", None)
         category = Category.objects.get(name=category_name) if category_name else None
-        return ClothingItem.objects.create(category=category, **validated_data)
+        new_tags_json = validated_data.pop("new_tags", None)
+        instance = ClothingItem.objects.create(category=category, **validated_data)
+        self.handle_tags(instance, new_tags_json)
+
+        return instance
 
     def update(self, instance, validated_data):
         print("UPDATE CALLED")
         print("validated_data:", validated_data)
         print("instance before:", instance.name, instance.category)
         category_name = validated_data.pop("category_name", None)
-        new_tags_json = validated_data.pop("new_tags", None)
-        new_tags_loaded = json.loads(new_tags_json) if new_tags_json else None
-        print(new_tags_loaded)
 
         if category_name:
             instance.category = Category.objects.get(name=category_name)
 
-        if new_tags_loaded is not None:
-            current_tags = instance.tagged_item.all()
-            for tag in new_tags_loaded:
-                if tag not in current_tags:
-                    newly_created_tag, _ = Tag.objects.get_or_create(
-                        name=tag, user=instance.user, defaults={"source": "user"}
-                    )
-                    ClothingItemTag.objects.create(item=instance, tag=newly_created_tag)
+        self.handle_tags(instance, validated_data.pop("new_tags", None))
 
         instance.name = validated_data.get("name", instance.name)
         instance.description = validated_data.get("description", instance.description)

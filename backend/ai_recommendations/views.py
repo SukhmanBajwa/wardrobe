@@ -19,10 +19,15 @@ class RecommendationsAPIView(APIView):
         if item_id:
             item = get_object_or_404(ClothingItem, id=item_id)
             if item.recommendations.exists():
+
+                # get the recommendations for an item
                 recommendations = AiRecommendation.objects.filter(
                     item=item,
                     recommended_item__is_deleted=False,
                 )
+
+                # get the recommendations where the item in scope is recommended
+                # i.e. if item A has been recommended in item B, view of item B should automatically show the item A in recommendation
                 recommendations_backwards = AiRecommendation.objects.filter(
                     recommended_item=item,
                     recommended_item__is_deleted=False,
@@ -34,6 +39,7 @@ class RecommendationsAPIView(APIView):
                     recommendations_backwards, many=True
                 ).data
 
+                # removing duplicates, that are created by finding recommendations backwards
                 seen = set()
                 unique = []
 
