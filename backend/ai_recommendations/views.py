@@ -4,10 +4,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from django.db.models import Q
-
 from ai_recommendations.models import AiRecommendation
 from .serializers import AiRecommendationsSerilizer, AiRecommendationsBackwardSerilizer
+from .management.commands import recom
+from django.core.management import call_command
 
 
 # Create your views here.
@@ -62,3 +62,9 @@ class RecommendationsAPIView(APIView):
             [],
             status=status.HTTP_200_OK,
         )
+
+
+class RegenerateRecommendations(APIView):
+    def get(self, request, item_id):
+        call_command("recom", request.user.id, "--item_ids", item_id)
+        return Response(status=status.HTTP_200_OK)

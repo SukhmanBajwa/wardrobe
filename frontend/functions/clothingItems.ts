@@ -4,10 +4,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const useClothingItems = ({
   item,
+  id,
   search,
   category,
 }: {
   item?: ClothingItem | null | undefined;
+  id?: number | null | undefined;
   search?: string | null | undefined;
   category?: string | null | undefined;
 }) => {
@@ -25,10 +27,11 @@ const useClothingItems = ({
 
   // Get
   const getItem = useQuery({
-    queryKey: ["clothingItem", item?.id],
+    queryKey: ["clothingItem", id],
     queryFn: async () => {
-      return await getClothingItem(item!.id);
+      return await getClothingItem(id!);
     },
+    enabled: !!id,
   });
 
   const getAllItems = useQuery({
@@ -67,7 +70,6 @@ const useClothingItems = ({
   //Soft Delete
   const deleteClothingItem = useMutation({
     mutationFn: async (id: number) => {
-      console.log(id);
       return await deleteClothingItemFn(id);
     },
     onMutate: async (deletedItem) => {

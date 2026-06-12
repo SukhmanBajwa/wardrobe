@@ -81,7 +81,6 @@ export default function Gallery() {
               placeholder="Search: Name, Description or Tags"
               onChange={(e) => {
                 setSearchParam(e.target.value);
-                console.log("fired onchange search bar");
               }}
               className="lg:w-[30vw] sm:w-full md:w-full focus:w-[50vw] hover:w-[50vw] transition-all duration-300 resize-none px-4 py-3 rounded-3xl bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />

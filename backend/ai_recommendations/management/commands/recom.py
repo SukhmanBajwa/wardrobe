@@ -7,7 +7,8 @@ from ai_recommendations import services
 
 
 class Command(BaseCommand):
-    help = "Regenerate AI recommendations for a user's clothing items"
+    help = """Regenerate AI recommendations for a user's clothing items, eg cmd py manage.py recom 6
+        py manage.py recom 6 --item_ids 37 4 16"""
 
     def add_arguments(self, parser):
         parser.add_argument("user_id", type=int, help="User ID")
