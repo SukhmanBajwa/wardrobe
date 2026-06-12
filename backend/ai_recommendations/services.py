@@ -18,10 +18,10 @@ def Ai_Recommendation(item_info, inventory_data):
             {
             "Good_match": [
                 {
-                4: "A black maxi skirt provides a sophisticated and elegant contrast to the off-white shirt. The black color allows the golden pattern on the shirt to stand out beautifully, creating a chic and well-balanced ensemble."
+                "4": "A black maxi skirt provides a sophisticated and elegant contrast to the off-white shirt. The black color allows the golden pattern on the shirt to stand out beautifully, creating a chic and well-balanced ensemble."
                 },
                 {
-                3: "A vibrant red long skirt offers a bold and stylish contrast to the off-white shirt. This pairing creates striking visual interest, with the red adding warmth and personality that can complement the golden accents of the shirt."
+                "3": "A vibrant red long skirt offers a bold and stylish contrast to the off-white shirt. This pairing creates striking visual interest, with the red adding warmth and personality that can complement the golden accents of the shirt."
                 }
             ],
             "Complete_outfit": [2,3,4]
@@ -32,12 +32,12 @@ def Ai_Recommendation(item_info, inventory_data):
         model="gemini-3.1-flash-lite",
         # model="gemini-2.5-flash-lite",
         contents=f"""
-                src: {item_info}, inv_list: {inventory_data}, Recommend clothing-items that pair with src.
-                Each recommended item should accompany a line of reasoning for why it pairs well.
-                Also tell best matches from all, one per category. 
-                Reply only JSON not text, 
-                Good_match w/ [] of key-value pairs (clothing_id: reason and 
-                Complete_outfit w/ [] of ids from best options from one per category.
+                src: {item_info}, inv_list: {inventory_data}
+                Recommend clothing items from inv_list that pair well with src.
+                IMPORTANT: Use only the numeric 'id' field from inv_list items. Never use names.
+                Reply ONLY in JSON.
+                Good_match: array of single key-value objects where key is item id as string and value is reason.
+                Complete_outfit: array of item ids as integers.
                 {example}
                 """,
     )
