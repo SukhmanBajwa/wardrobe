@@ -22,7 +22,7 @@ export default function ItemDetail({
   const { getAiRecommendation, triggerRefresh } = useAiRecommendations(item.id);
   const [refreshingRecommendations, setRefreshingRecommendations] =
     useState<boolean>(false);
-  const [selectedRecommendation, setSelectedRecomendation] =
+  const [selectedRecommendation, setSelectedRecommendation] =
     useState<AiRecommendation | null>(null);
 
   useEffect(() => {
@@ -41,79 +41,92 @@ export default function ItemDetail({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div
-        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 shadow-2xl p-5"
+        className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-header flex justify-between">
-          <div className="">
-            <h1 className="text-2xl font-bold text-gray-200">Item details</h1>
-          </div>
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4 border-b border-gray-700/60 px-6 py-4">
+          <h1 className="text-xl font-bold text-gray-100">Item details</h1>
 
-          <div className="grid grid-cols-4 gap-1">
+          <div className="flex items-center gap-1">
             <button
-              className="col-span-1 cursor-pointer hover:bg-gray-200/5 active:bg-gray-500/5 p-1"
+              type="button"
               onClick={() => {
                 onEdit();
                 onClose();
               }}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white active:scale-95"
             >
               Edit
             </button>
-            <button className="col-span-1 cursor-pointer hover:bg-gray-200/5 active:bg-gray-500/5 p-1">
+            <button
+              type="button"
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white active:scale-95"
+            >
               Share
             </button>
             <button
-              className="col-span-1 cursor-pointer hover:bg-gray-200/5 active:bg-gray-500/5 p-1"
+              type="button"
               onClick={async () => {
                 await deleteClothingItem.mutateAsync(item.id);
                 onDelete();
                 onClose();
               }}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-red-400 transition hover:bg-red-500/10 hover:text-red-300 active:scale-95"
             >
               Delete
             </button>
-            <X
-              size="40"
-              className="cursor-pointer hover:bg-gray-200/5 active:bg-gray-500/5 p-1"
+            <button
+              type="button"
               onClick={onClose}
-            />
+              aria-label="Close"
+              className="ml-1 rounded-lg p-1.5 text-gray-400 transition hover:bg-white/10 hover:text-gray-100 active:scale-95"
+            >
+              <X size={22} />
+            </button>
           </div>
         </div>
-        <hr className="border-gray-600 "></hr>
-        <div className="modal-body flex flex-row p-3">
-          <div className="item w-1/2">
+
+        {/* Body */}
+        <div className="flex flex-col gap-6 p-6 md:flex-row">
+          {/* Item */}
+          <div className="flex flex-col gap-3 md:w-1/2">
             <Image
               src={item.image_url || "https://picsum.photos/id/237/500/700"}
               alt={item.name}
-              width={250}
-              height={250}
-              className="rounded-lg object-cover w-64 h-64"
+              width={320}
+              height={320}
+              className="h-64 w-64 rounded-xl object-cover ring-1 ring-white/10"
               priority
             />
-            <div className="flex flex-col gap-1 mt-3 text-1xl items-baseline">
-              <h2 className=" font-bold">{item.name}</h2>
-              <div className="flex flew-row gap-2">
+
+            <span className="inline-block w-fit rounded-full bg-indigo-600 px-3 py-1 text-xs font-medium text-white">
+              {capitalize(item.category)}
+            </span>
+
+            <h2 className="text-2xl font-bold text-gray-100">{item.name}</h2>
+
+            {item.tags?.length > 0 && (
+              <div className="flex flex-wrap gap-2">
                 {item.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-block font-light text-sm text-gray-400"
-                  >
+                  <span key={tag} className="text-sm font-light text-gray-400">
                     #{tag}
                   </span>
                 ))}
               </div>
-              <p className=" bg-indigo-600 text-white text-xs font-light px-2 py-1 mt-1 rounded-full mr-2 mb-2 w-auto">
-                {capitalize(item.category)}
-              </p>
+            )}
 
-              <hr className="border-gray-600 w-70 my-1"></hr>
-              <p className="text-gray-400">{capitalize(item.description)}</p>
-            </div>
+            <hr className="border-gray-700/60" />
+
+            <p className="leading-relaxed text-gray-300">
+              {capitalize(item.description)}
+            </p>
           </div>
+
           {/* Recommendations */}
-          <div className="recommendations w-1/2">
-            <div className="flex flex-row items-center">
-              <h2 className="text-white font-bold mb-2">Pairs well with</h2>
+          <div className="md:w-1/2 md:border-l md:border-gray-700/60 md:pl-6">
+            <div className="mb-3 flex items-center gap-2">
+              <h2 className="font-bold text-white">Pairs well with</h2>
               <button
                 type="button"
                 // .refetch to re run the querry, but technically we manually running the querry, as auto run is false in hook for this querry
@@ -123,51 +136,59 @@ export default function ItemDetail({
                 }}
                 title="Refresh AI recommendations"
                 aria-label="Refresh AI recommendations"
-                className="cursor-pointer rounded p-1.5 hover:bg-gray-200/10 active:bg-gray-500/10 mb-3 ml-2"
+                className="cursor-pointer rounded-lg p-1.5 text-gray-400 transition hover:bg-white/10 hover:text-white active:scale-95"
               >
-                <RefreshCw size={25} aria-hidden="true" />
+                <RefreshCw size={18} aria-hidden="true" />
               </button>
             </div>
+
             {refreshingRecommendations ? (
-              <div>Loading recommendations</div>
+              <div className="flex items-center gap-2 py-6 text-sm text-gray-400">
+                <RefreshCw
+                  size={16}
+                  className="animate-spin"
+                  aria-hidden="true"
+                />
+                Loading recommendations…
+              </div>
             ) : (
-              <div className="flex flex-col justify-evenly gap-2">
+              <div className="flex flex-col gap-2">
                 {getAiRecommendation.data &&
                   getAiRecommendation.data.map(
                     (rec: AiRecommendation, index: number) => (
                       <div
                         key={index}
-                        className="flex flex-row gap-3 bg-gray-900/80 backdrop:blur-sm p-2 border-0 rounded-2xl cursor-pointer hover:bg-gray-950 hover:border"
-                        onClick={() => setSelectedRecomendation(rec)}
+                        className="flex cursor-pointer flex-row items-center gap-3 rounded-2xl border border-transparent bg-gray-900/80 p-2 transition hover:border-gray-700 hover:bg-gray-950"
+                        onClick={() => setSelectedRecommendation(rec)}
                       >
                         <Image
                           src={
-                            rec.recommended_item.image ||
+                            rec.recommended_item.image_url ||
                             "https://picsum.photos/id/237/500/700"
                           }
                           alt={rec.recommended_item.name}
                           width={100}
                           height={100}
-                          className="rounded-lg object-cover flex-shrink-0 w-20 h-20"
+                          className="h-20 w-20 flex-shrink-0 rounded-lg object-cover"
                           priority
                         />
-                        <div className="col-span-3">
-                          <h3 className="text-white text-sm font-medium">
+                        <div className="min-w-0">
+                          <h3 className="truncate text-sm font-medium text-white">
                             {rec.recommended_item.name}
                           </h3>
-                          <p className="text-gray-400 text-xs">{rec.reason}</p>
+                          <p className="text-xs text-gray-400">{rec.reason}</p>
                         </div>
-                        <hr className="m-2 border-gray-600 "></hr>
                       </div>
                     ),
                   )}
               </div>
             )}
           </div>
+
           {selectedRecommendation && (
             <RecommendationDetail
               recommendation={selectedRecommendation}
-              onClose={() => setSelectedRecomendation(null)}
+              onClose={() => setSelectedRecommendation(null)}
             />
           )}
         </div>

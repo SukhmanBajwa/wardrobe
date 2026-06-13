@@ -32,9 +32,9 @@ export default function Gallery() {
     : [{ id: 0, name: "All" }];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4 gap-6">
-      <header className="border-b rounded-2xl shadow-2xl p-4 border-gray-700 ">
-        <div className="flex justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950">
+      <header className="border-b border-gray-800 px-4 py-4 sm:px-6">
+        <div className="flex items-center justify-between">
           <Link href="/gallery">
             <Image
               src="/wardrobe.svg"
@@ -42,55 +42,63 @@ export default function Gallery() {
               width={80}
               height={20}
               priority
-              className="mx-start mb-3 rounded-xl"
+              className="rounded-xl"
             />
           </Link>
 
-          <button className="cursor-pointer" onClick={() => setLogout(true)}>
+          <button
+            type="button"
+            className="cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white active:scale-95"
+            onClick={() => setLogout(true)}
+          >
             Logout
           </button>
           {logout && <Logout></Logout>}
         </div>
-        <div className="flex flex-col lg:flex-row justify-between items-center">
-          <div className="pt-3">
-            <ul>
-              {categoriesAvailable &&
-                categoriesAvailable.map(
-                  (category: { id: number; name: string }) => (
-                    <li
-                      key={category.id}
-                      className="inline-block cursor-pointer text-white text-xs font-light border border-gray-500 px-3 py-1 rounded-full mr-2 mb-2  active:bg-indigo-500 focus:bg-indigo-500"
-                      onClick={() => {
-                        setCategoryFilter(category.name);
-                        if (category.name == "All" && searchParam) {
-                          setSearchParam("");
-                        }
-                      }}
-                    >
-                      {capitalize(category.name)}
-                    </li>
-                  ),
-                )}
-            </ul>
-          </div>
-          <div>
-            <input
-              id="search"
-              value={searchParam}
-              placeholder="Search: Name, Description or Tags"
-              onChange={(e) => {
-                setSearchParam(e.target.value);
-              }}
-              className="lg:w-[30vw] sm:w-full md:w-full focus:w-[50vw] hover:w-[50vw] transition-all duration-300 resize-none px-4 py-3 rounded-3xl bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
+
+        <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <ul className="flex flex-wrap gap-2">
+            {categoriesAvailable &&
+              categoriesAvailable.map(
+                (category: { id: number; name: string }) => (
+                  <li
+                    key={category.id}
+                    className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-light transition ${
+                      categoryFilter === category.name
+                        ? "border-indigo-500 bg-indigo-500 text-white"
+                        : "border-gray-600 text-gray-300 hover:border-gray-400 hover:text-white"
+                    }`}
+                    onClick={() => {
+                      setCategoryFilter(category.name);
+                      if (category.name == "All" && searchParam) {
+                        setSearchParam("");
+                      }
+                    }}
+                  >
+                    {capitalize(category.name)}
+                  </li>
+                ),
+              )}
+          </ul>
+
+          <input
+            id="search"
+            value={searchParam}
+            placeholder="Search: Name, Description or Tags"
+            onChange={(e) => {
+              setSearchParam(e.target.value);
+            }}
+            className="w-full rounded-full border border-gray-700 bg-gray-900 px-4 py-3 text-white placeholder-gray-500 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 lg:w-[30vw] lg:focus:w-[50vw]"
+          />
         </div>
       </header>
 
-      <main>
-        <div className="flex flex-col relative">
-          <p className="px-3">{clothingItems.length} items</p>
-          <div className="flex items-start justify-normal flex-wrap px-4 gap-6 my-6">
+      <main className="px-4 sm:px-6">
+        <div className="relative flex flex-col">
+          <p className="px-1 pt-6 text-sm text-gray-400">
+            {clothingItems.length} items
+          </p>
+          <div className="my-6 flex flex-wrap items-start gap-6">
             {clothingItems.map((item: ClothingItem) => (
               <ClothingItemCard
                 key={item.id}
@@ -106,15 +114,17 @@ export default function Gallery() {
               />
             ))}
           </div>
-          <div className="fixed bottom-6 right-6 cursor-pointer w-12 h-12">
-            <CirclePlus
-              size="40"
-              color="#ffffff"
-              className="transition duration-150 ease-in-out hover:scale-110 hover:fill-violet-300/50 active:scale-100"
-              onClick={() => setAddItemModalOpen(true)}
-            />
-          </div>
+
+          <button
+            type="button"
+            aria-label="Add item"
+            onClick={() => setAddItemModalOpen(true)}
+            className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg transition duration-150 ease-in-out hover:scale-110 hover:bg-indigo-500 active:scale-100"
+          >
+            <CirclePlus size={28} aria-hidden="true" />
+          </button>
         </div>
+
         {detailModalOpen && selectedItem && (
           <ItemDetail
             item={selectedItem}
