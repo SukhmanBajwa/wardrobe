@@ -9,7 +9,6 @@ import Logout from "@/components/Logout";
 import { CirclePlus } from "lucide-react";
 import ItemForm from "@/components/ItemForm";
 import { useClothingItems } from "@/functions/clothingItems";
-import { get } from "http";
 
 export default function Gallery() {
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);

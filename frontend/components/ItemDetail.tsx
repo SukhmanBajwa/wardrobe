@@ -4,7 +4,7 @@ import { X, RefreshCw } from "lucide-react";
 import { useClothingItems } from "@/functions/clothingItems";
 import { useAiRecommendations } from "@/functions/aiRecommendations";
 import { useState, useEffect } from "react";
-import { get } from "http";
+import RecommendationDetail from "@/components/RecommendationDetail";
 
 export default function ItemDetail({
   item,
@@ -22,6 +22,8 @@ export default function ItemDetail({
   const { getAiRecommendation, triggerRefresh } = useAiRecommendations(item.id);
   const [refreshingRecommendations, setRefreshingRecommendations] =
     useState<boolean>(false);
+  const [selectedRecommendation, setSelectedRecomendation] =
+    useState<AiRecommendation | null>(null);
 
   useEffect(() => {
     if (!getAiRecommendation.isFetching && refreshingRecommendations) {
@@ -29,9 +31,19 @@ export default function ItemDetail({
     }
   }, [getAiRecommendation.isFetching]);
 
+  // Close on Escape
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   return (
-    <div className=" modal-container bg-black/50 absolute z-20">
-      <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 rounded-xl p-6 w-full max-w-3xl max-h-screen overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div
+        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 shadow-2xl p-5"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header flex justify-between">
           <div className="">
             <h1 className="text-2xl font-bold text-gray-200">Item details</h1>
@@ -126,6 +138,7 @@ export default function ItemDetail({
                       <div
                         key={index}
                         className="flex flex-row gap-3 bg-gray-900/80 backdrop:blur-sm p-2 border-0 rounded-2xl cursor-pointer hover:bg-gray-950 hover:border"
+                        onClick={() => setSelectedRecomendation(rec)}
                       >
                         <Image
                           src={
@@ -151,6 +164,12 @@ export default function ItemDetail({
               </div>
             )}
           </div>
+          {selectedRecommendation && (
+            <RecommendationDetail
+              recommendation={selectedRecommendation}
+              onClose={() => setSelectedRecomendation(null)}
+            />
+          )}
         </div>
       </div>
     </div>
