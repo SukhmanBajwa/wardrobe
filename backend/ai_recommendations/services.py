@@ -38,6 +38,7 @@ def Ai_Recommendation(item_info, inventory_data):
                 Reply ONLY in JSON.
                 Good_match: array of single key-value objects where key is item id as string and value is reason.
                 Complete_outfit: array of item ids as integers.
+                following is the example of reply requested
                 {example}
                 """,
     )

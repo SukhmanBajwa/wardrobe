@@ -30,18 +30,21 @@ class ClothingItemViewSet(viewsets.ModelViewSet):
         return queryset
 
     @staticmethod
-    def run_recommendations(new_item, inventory):
-        print("it ran")
-        ai_reply, _ = services.Ai_Recommendation(new_item, inventory)
+    def run_recommendations(new_item, inventory_data):
+        item_info = ClothingItemSerializer(new_item).data
+        print(item_info)
+        print(inventory_data)
+        ai_reply, _ = services.Ai_Recommendation(item_info, inventory_data)
         services.Save_Ai_Recommendations(new_item.id, ai_reply)
 
     # method override from CreateModelMixin to change the behaviour of save. Include user info
     def perform_create(self, serializer):
         new_item = serializer.save(user=self.request.user)
+        inventory_data = ClothingItemSerializer(self.get_queryset(), many=True).data
 
         # making ai recommendation work behind the scene and let item appear in view instantly
         thread = threading.Thread(
-            target=self.run_recommendations, args=(new_item, self.get_queryset())
+            target=self.run_recommendations, args=(new_item, inventory_data)
         )
         thread.daemon = True
         thread.start()
