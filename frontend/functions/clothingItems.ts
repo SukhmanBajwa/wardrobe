@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchWithAuth } from "./fetchWithAuth";
 
 // Hook
 
@@ -113,7 +114,7 @@ export { useClothingItems };
 
 // Helper functions
 async function addClothingItemFn(formData: FormData) {
-  const response = await fetch(
+  const response = await fetchWithAuth(
     process.env.NEXT_PUBLIC_API_URL + "/v1/clothing_items/",
     {
       method: "POST",
@@ -135,7 +136,7 @@ async function getClothingItems(
       : `?search=${search}`
     : "";
   try {
-    const res = await fetch(
+    const res = await fetchWithAuth(
       process.env.NEXT_PUBLIC_API_URL +
         "/v1/clothing_items/" +
         categoryParam +
@@ -152,7 +153,7 @@ async function getClothingItems(
 }
 
 async function getClothingItem(id: number) {
-  const res = await fetch(
+  const res = await fetchWithAuth(
     process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}`,
     {
       method: "GET",
@@ -174,7 +175,7 @@ async function editClothingItemFn(id: number, formData: FormData) {
         (bodyData as Record<string, string>)[key] = value as string;
       }
     }
-    const res = await fetch(
+    const res = await fetchWithAuth(
       process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}/`,
       {
         method: "PATCH",
@@ -199,7 +200,7 @@ async function editClothingItemFn(id: number, formData: FormData) {
 // Soft delete — sends DELETE request, backend sets is_deleted=True instead of removing the record
 async function deleteClothingItemFn(id: number) {
   try {
-    const res = await fetch(
+    const res = await fetchWithAuth(
       process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}/`,
       {
         headers: { "Content-Type": "application/json" },
@@ -218,7 +219,7 @@ async function deleteClothingItemFn(id: number) {
 
 // fetch available categories.
 async function fetchAvailableCategoriesFn() {
-  const response = await fetch(
+  const response = await fetchWithAuth(
     process.env.NEXT_PUBLIC_API_URL + `/v1/categories/`,
     {
       method: "GET",

@@ -1,12 +1,12 @@
-import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState, useRef } from "react";
+import { fetchWithAuth } from "./fetchWithAuth";
 
 // Hook
 
 const useAiRecommendations = (id: number) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const previousDataRef = useRef<AiRecommendation[] | null>(null);
-  const queryClient = useQueryClient();
 
   const getAiRecommendation = useQuery({
     queryKey: ["aiRecom", id],
@@ -38,7 +38,7 @@ const useAiRecommendations = (id: number) => {
 export { useAiRecommendations };
 
 const fetchAiRecommendations = async (id: number) => {
-  const res = await fetch(
+  const res = await fetchWithAuth(
     process.env.NEXT_PUBLIC_API_URL + `/v1/ai/ai_req/${id}`,
     {
       method: "GET",
@@ -57,7 +57,7 @@ const fetchAiRecommendations = async (id: number) => {
 };
 
 const refreshAiRecommendations = async (id: number) => {
-  const res = await fetch(
+  const res = await fetchWithAuth(
     process.env.NEXT_PUBLIC_API_URL + `/v1/ai/ai_req_refresh/${id}`,
     {
       method: "GET",
