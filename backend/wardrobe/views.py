@@ -63,5 +63,12 @@ class ClothesCategoriesViewSet(viewsets.ModelViewSet):
         user = self.request.user
         return Category.objects.filter(user=user)
 
+    # passing in user to assign categories their owners,
+    # no need to override other crud functions as nothing is been added to functions, not even user.
+    # oncce user is assigned by create, it is never changed.
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        print(serializer.validated_data)
+        serializer.save()
