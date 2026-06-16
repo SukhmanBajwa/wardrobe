@@ -27,8 +27,8 @@ export default function Gallery() {
     category: categoryFilter === "All" ? "" : categoryFilter,
   });
 
-  const clothingItems = getAllItems.data ?? [];
-  const categoriesAvailable = getCategories.data
+  const clothingItems: ClothingItem[] = getAllItems.data ?? [];
+  const categoriesAvailable: Category[] = getCategories.data
     ? [{ id: 0, name: "All" }, ...getCategories.data]
     : [{ id: 0, name: "All" }];
 
@@ -42,14 +42,12 @@ export default function Gallery() {
   }, [toggleSettings]);
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950">
+    <div className="flex flex-col min-h-screen min-w-screen bg-linear-to-br from-gray-950 via-gray-900 to-indigo-950">
       <div
         className={`transition-all duration-300 ease-in-out ${
-          toggleSettings ? "opacity-50" : "opacity-100"
+          toggleSettings ? "opacity-50 pointer-events-auto" : "opacity-100"
         }`}
-        onClick={() =>
-          toggleSettings ? setToggleSettings(false) : setToggleSettings(true)
-        }
+        onClick={() => (toggleSettings ? setToggleSettings(false) : null)}
       >
         <div className="flex flex-col">
           <header className="border-b border-gray-800 px-4 py-4 sm:px-6">
