@@ -27,9 +27,14 @@ export default function Gallery() {
     category: categoryFilter === "All" ? "" : categoryFilter,
   });
 
-  const clothingItems: ClothingItem[] = getAllItems.data ?? [];
+  const clothingItems: ClothingItem[] = (getAllItems.data ?? []).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
   const categoriesAvailable: Category[] = getCategories.data
-    ? [{ id: 0, name: "All" }, ...getCategories.data]
+    ? [
+        { id: 0, name: "All" },
+        ...getCategories.data.sort((a, b) => a.name.localeCompare(b.name)),
+      ]
     : [{ id: 0, name: "All" }];
 
   useEffect(() => {
