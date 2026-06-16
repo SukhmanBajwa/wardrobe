@@ -77,7 +77,7 @@ const useClothingItems = ({
       await queryClient.cancelQueries({ queryKey: ["clothingItems"] });
 
       const previousItems = queryClient.getQueryData(["clothingItems"]);
-
+      // old is the entire list of items
       queryClient.setQueryData(["clothingItems"], (old: ClothingItem[]) => {
         if (!old) return old;
         return old.filter((item) => item.id !== deletedItem.id);
@@ -101,13 +101,74 @@ const useClothingItems = ({
     },
   });
 
+  // Add category
+  const addCategory = useMutation({
+    mutationFn: async (name: string) => {
+      return await addNewCategoryFn(name);
+    },
+
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["allCategories"] }),
+  });
+
+  // Edit category
+  const editCategory = useMutation({
+    mutationFn: async (category: Category) => {
+      return await editAvailableCategoryFn(category);
+    },
+    onMutate: async (editedCategory) => {
+      await queryClient.cancelQueries({ queryKey: ["allCategories"] });
+      const previousCategories = queryClient.getQueryData(["allCategories"]);
+      queryClient.setQueryData(["allCategories"], (old: Category[]) => {
+        if (!old) return old;
+        return [
+          editedCategory,
+          ...old.filter((cat) => cat.id !== editedCategory.id),
+        ];
+      });
+      return { previousCategories };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(["allCategories"], context?.previousCategories);
+    },
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["allCategories"] }),
+  });
+
+  // Delete category
+  const deleteCategory = useMutation({
+    mutationFn: async (category: Category) => {
+      return await deleteAvailableCategoryFn(category);
+    },
+
+    onMutate: async (deletedCategory) => {
+      await queryClient.cancelQueries({ queryKey: ["allCategories"] });
+      const previousCategories = queryClient.getQueryData(["allCategories"]);
+      // old is entire list categories
+      queryClient.setQueryData(["allCategories"], (old: Category[]) => {
+        if (!old) return old;
+        return old.filter((category) => category.id !== deletedCategory.id);
+      });
+      return { previousCategories };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(["allCategories"], context?.previousCategories);
+    },
+    onSettled: (data, error, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["allCategories"] });
+    },
+  });
+
   return {
     getItem,
     getAllItems,
     editClothingItem,
     addClothingItem,
     deleteClothingItem,
+    addCategory,
     getCategories,
+    editCategory,
+    deleteCategory,
   };
 };
 export { useClothingItems };
@@ -232,5 +293,74 @@ async function fetchAvailableCategoriesFn() {
   } else {
     const errorResponse = await response.json();
     alert(`Failed to fectch categories: ${errorResponse.error}`);
+  }
+}
+
+// add new category
+
+async function addNewCategoryFn(name: string) {
+  const data = {
+    name: `${name}`,
+  };
+  const response = await fetchWithAuth(
+    process.env.NEXT_PUBLIC_API_URL + `/v1/categories/`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    },
+  );
+  if (response.ok) {
+    const res = await response.json();
+    return res;
+  } else {
+    const errorResponse = await response.json();
+    alert(`Failed to add new category: ${name}: ${errorResponse.error}`);
+  }
+}
+// edit available category
+async function editAvailableCategoryFn(category: Category) {
+  console.log(category.name);
+  const data = {
+    id: `${category.id}`,
+    name: `${category.name}`,
+  };
+  const response = await fetchWithAuth(
+    process.env.NEXT_PUBLIC_API_URL + `/v1/categories/${category.id}/`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    },
+  );
+  if (response.ok) {
+    const res = await response.json();
+    return res;
+  } else {
+    const errorResponse = await response.json();
+    alert(`Failed to edit: ${category.name}: ${errorResponse.error}`);
+  }
+}
+
+// delete available category
+async function deleteAvailableCategoryFn(category: Category) {
+  const response = await fetchWithAuth(
+    process.env.NEXT_PUBLIC_API_URL + `/v1/categories/${category.id}/`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    },
+  );
+  if (response.ok) {
+    return response;
+  } else {
+    const errorResponse = await response.json();
+    alert(`Failed to delete: ${category.name}: ${errorResponse.error}`);
   }
 }
