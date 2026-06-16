@@ -1,8 +1,15 @@
 "use client";
-import { X, Plus, Trash2 } from "lucide-react";
+import { X, Plus, Trash2, CheckIcon, ChevronDownIcon } from "lucide-react";
 import { useClothingItems } from "@/functions/clothingItems";
 import { useEffect, useState } from "react";
 import capitalize from "@/functions/capitalize";
+import {
+  Label,
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
 
 export default function ItemForm({
   onClose,
@@ -155,35 +162,56 @@ export default function ItemForm({
           <div className="flex flex-1 flex-col gap-4">
             {/* Name + Category row */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 ">
                 <label className="text-sm text-gray-300">Name</label>
-                <textarea
+                <input
                   name="name"
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Item name"
                   defaultValue={name}
-                  rows={1}
                   maxLength={30}
+                  className="h-12 rounded-lg border border-gray-700 bg-gray-900 px-4 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm text-gray-300">Category</label>
-                <select
+                <Listbox
                   name="category"
-                  defaultValue={categoryName || "Select"}
-                  onChange={(e) => setCategoryName(e.target.value)}
-                  className="rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  onChange={setCategoryName}
+                  value={categoryName}
                 >
-                  <option value={item ? `${categoryName}` : "Select"} disabled>
-                    {item ? `${capitalize(categoryName)}` : "Select"}
-                  </option>
-                  {categoriesAvailable &&
-                    categoriesAvailable.map((category: Category) => (
-                      <option key={category.id} value={category.name}>
-                        {capitalize(category.name)}
-                      </option>
-                    ))}
-                </select>
+                  <Label className="text-sm text-gray-300">Category</Label>
+                  <ListboxButton className="flex h-12 w-full items-center justify-between rounded-lg border border-gray-700 bg-gray-900 px-4 text-left text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <span>
+                      {categoryName
+                        ? capitalize(categoryName)
+                        : "Select category"}
+                    </span>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="size-5 text-gray-400"
+                    />
+                  </ListboxButton>
+                  <ListboxOptions
+                    anchor="bottom start"
+                    className="mt-1 w-[var(--button-width)] z-50 rounded-lg border border-gray-700 bg-gray-900 py-1 shadow-lg focus:outline-none"
+                  >
+                    {categoriesAvailable &&
+                      categoriesAvailable.map((category: Category) => (
+                        <ListboxOption
+                          key={category.id}
+                          value={category.name}
+                          className="group relative cursor-default py-2 pr-9 pl-3 text-white select-none data-focus:bg-indigo-500 data-focus:outline-hidden"
+                        >
+                          <span className="block truncate">
+                            {capitalize(category.name)}
+                          </span>
+                          <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-400 group-not-data-selected:hidden group-data-focus:text-white">
+                            <CheckIcon aria-hidden="true" className="size-5" />
+                          </span>
+                        </ListboxOption>
+                      ))}
+                  </ListboxOptions>
+                </Listbox>
               </div>
             </div>
 
