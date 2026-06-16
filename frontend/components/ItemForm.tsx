@@ -2,6 +2,7 @@
 import { X, Plus, Trash2 } from "lucide-react";
 import { useClothingItems } from "@/functions/clothingItems";
 import { useEffect, useState } from "react";
+import capitalize from "@/functions/capitalize";
 
 export default function ItemForm({
   onClose,
@@ -16,8 +17,6 @@ export default function ItemForm({
   const [categoryName, setCategoryName] = useState(item?.category ?? "");
   const [tags, setTags] = useState<string[]>(item?.tags ?? []);
   const [tagInput, setTagInput] = useState("");
-
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
   const formData = new FormData();
 
   const { editClothingItem, addClothingItem, getCategories } = useClothingItems(
@@ -165,7 +164,6 @@ export default function ItemForm({
                   defaultValue={name}
                   rows={1}
                   maxLength={30}
-                  className="resize-none rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -180,7 +178,7 @@ export default function ItemForm({
                     {item ? `${capitalize(categoryName)}` : "Select"}
                   </option>
                   {categoriesAvailable &&
-                    categoriesAvailable.map((category) => (
+                    categoriesAvailable.map((category: Category) => (
                       <option key={category.id} value={category.name}>
                         {capitalize(category.name)}
                       </option>

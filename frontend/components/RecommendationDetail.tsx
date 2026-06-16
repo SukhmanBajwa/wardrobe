@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
+import capitalize from "@/functions/capitalize";
 
 export default function RecommendationDetail({
   recommendation,
@@ -12,9 +13,6 @@ export default function RecommendationDetail({
   onClose: () => void;
 }) {
   const item = recommendation.recommended_item;
-  const capitalize = (s: string) =>
-    s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-
   // Close on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();

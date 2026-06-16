@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Pencil } from "lucide-react";
+import capitalize from "@/functions/capitalize";
 
 export default function ClothingItemCard({
   item,
@@ -9,7 +10,6 @@ export default function ClothingItemCard({
   onEditSelect,
 }: ClothingItemCardProps) {
   const { name, image_url, tags, description, category } = item;
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
   return (
     <div className="relative sm:w-full md:w-59">
       <div className="absolute top-2 right-2 z-10 mix-blend-difference text-white cursor-pointer rounded-2xl hover:bg-green-900 p-1 border-0 hover:border hover:scale-110 transition ease-in-out duration-300">

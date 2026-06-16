@@ -1,3 +1,4 @@
+"use client";
 import "./ItemDetail.css";
 import Image from "next/image";
 import { X, RefreshCw } from "lucide-react";
@@ -5,7 +6,7 @@ import { useClothingItems } from "@/functions/clothingItems";
 import { useAiRecommendations } from "@/functions/aiRecommendations";
 import { useState, useEffect } from "react";
 import RecommendationDetail from "@/components/RecommendationDetail";
-
+import capitalize from "@/functions/capitalize";
 export default function ItemDetail({
   item,
   onClose,
@@ -17,7 +18,6 @@ export default function ItemDetail({
   onDelete?: () => void;
   onEdit?: () => void;
 }) {
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
   const { deleteClothingItem } = useClothingItems({});
   const { getAiRecommendation, triggerRefresh } = useAiRecommendations(item.id);
   const [refreshingRecommendations, setRefreshingRecommendations] =
