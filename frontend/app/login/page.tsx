@@ -1,33 +1,23 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { sendLogin } from "@/functions/auth";
 import { useRouter } from "next/navigation";
-import { WhoAmI } from "@/functions/userLoginState";
+import { useLoginData } from "@/functions/userLoginState";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [user, setUser] = useState<UserData | null>(null);
   const router = useRouter();
+  const queryClient = useQueryClient();
+  // the colon syntax data: user means "take the property called data, but call it user in my local scope instead.
+  const { data: user } = useLoginData();
 
   useEffect(() => {
-    const getUser = async () => {
-      const userData = await WhoAmI();
-      setUser(userData);
-    };
-    getUser();
-  }, []);
-
-  useEffect(() => {
-    const getLoginState = () => {
-      if (user) {
-        router.push("/gallery");
-      }
-    };
-    getLoginState();
-  }, [user]);
+    if (user) {
+      router.push("/gallery");
+    }
+  }, [user, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4">
@@ -52,13 +42,16 @@ export default function Login() {
             className="flex flex-col gap-5"
             onSubmit={async (e) => {
               e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const username = formData.get("username") as string;
+              const password = formData.get("password") as string;
+
               const loginResponse: Response = await sendLogin(
                 username,
                 password,
               );
               if (loginResponse.ok) {
-                const userData = await WhoAmI();
-                setUser(userData);
+                await queryClient.invalidateQueries({ queryKey: ["whoami"] });
                 router.push("/gallery");
               } else {
                 const errorResponse = await loginResponse.json();
@@ -68,17 +61,17 @@ export default function Login() {
           >
             <div className="flex flex-col gap-1.5">
               <label
-                htmlFor="email"
+                htmlFor="username"
                 className="text-xs font-medium text-gray-400 uppercase tracking-wider"
               >
                 Username
               </label>
               <input
                 id="username"
+                name="username"
                 type="text"
                 placeholder="Enter your username"
                 className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                onInput={(e) => setUsername(e.currentTarget.value)}
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -90,10 +83,10 @@ export default function Login() {
               </label>
               <input
                 id="password"
+                name="password"
                 type="password"
                 placeholder="••••••••"
                 className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                onInput={(e) => setPassword(e.currentTarget.value)}
               />
             </div>
             <button
