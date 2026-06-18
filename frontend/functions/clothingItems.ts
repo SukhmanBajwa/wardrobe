@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchWithAuth } from "./fetchWithAuth";
+import { Variable } from "lucide-react";
 
 // Hook
 
@@ -159,6 +160,34 @@ const useClothingItems = ({
     },
   });
 
+  // Get Tags
+  const getTags = useQuery({
+    queryKey: ["allTags"],
+    queryFn: getTagsFn,
+  });
+
+  // Delete Tag
+  const deleteTag = useMutation({
+    mutationFn: async (tag: Tag) => {
+      return await deleteAvailableTagFn(tag);
+    },
+    onMutate: async (deletedTag: Tag) => {
+      await queryClient.cancelQueries({ queryKey: ["allTags"] });
+      const previousTags = queryClient.getQueryData(["allTags"]);
+      queryClient.setQueryData(["allTags"], (old: Tag[]) => {
+        if (!old) return old;
+        return old.filter((tag) => tag.id !== deletedTag.id);
+      });
+      return { previousTags };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(["allTags"], context?.previousTags);
+    },
+    onSettled: (data, error, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["allTags"] });
+    },
+  });
+
   return {
     getItem,
     getAllItems,
@@ -169,6 +198,8 @@ const useClothingItems = ({
     getCategories,
     editCategory,
     deleteCategory,
+    getTags,
+    deleteTag,
   };
 };
 export { useClothingItems };
@@ -179,7 +210,7 @@ async function addClothingItemFn(formData: FormData) {
     process.env.NEXT_PUBLIC_API_URL + "/v1/clothing_items/",
     {
       method: "POST",
-      credentials: "include",
+
       body: formData,
     },
   );
@@ -204,7 +235,6 @@ async function getClothingItems(
         searchParam,
       {
         method: "GET",
-        credentials: "include",
       },
     );
     return await res.json();
@@ -218,7 +248,6 @@ async function getClothingItem(id: number) {
     process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}`,
     {
       method: "GET",
-      credentials: "include",
     },
   );
   if (!res.ok) throw new Error("Failed to fetch item");
@@ -240,7 +269,7 @@ async function editClothingItemFn(id: number, formData: FormData) {
       process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}/`,
       {
         method: "PATCH",
-        credentials: "include",
+
         headers: formData.has("image")
           ? undefined
           : { "Content-Type": "application/json" },
@@ -266,7 +295,6 @@ async function deleteClothingItemFn(id: number) {
       {
         headers: { "Content-Type": "application/json" },
         method: "DELETE",
-        credentials: "include",
       },
     );
     if (!res.ok) {
@@ -284,7 +312,6 @@ async function fetchAvailableCategoriesFn() {
     process.env.NEXT_PUBLIC_API_URL + `/v1/categories/`,
     {
       method: "GET",
-      credentials: "include",
     },
   );
   if (response.ok) {
@@ -306,7 +333,7 @@ async function addNewCategoryFn(name: string) {
     process.env.NEXT_PUBLIC_API_URL + `/v1/categories/`,
     {
       method: "POST",
-      credentials: "include",
+
       headers: {
         "Content-Type": "application/json",
       },
@@ -332,7 +359,7 @@ async function editAvailableCategoryFn(category: Category) {
     process.env.NEXT_PUBLIC_API_URL + `/v1/categories/${category.id}/`,
     {
       method: "PATCH",
-      credentials: "include",
+
       headers: {
         "Content-Type": "application/json",
       },
@@ -354,7 +381,6 @@ async function deleteAvailableCategoryFn(category: Category) {
     process.env.NEXT_PUBLIC_API_URL + `/v1/categories/${category.id}/`,
     {
       method: "DELETE",
-      credentials: "include",
     },
   );
   if (response.ok) {
@@ -362,5 +388,37 @@ async function deleteAvailableCategoryFn(category: Category) {
   } else {
     const errorResponse = await response.json();
     alert(`Failed to delete: ${category.name}: ${errorResponse.error}`);
+  }
+}
+
+// get tags
+async function getTagsFn() {
+  const response = await fetchWithAuth(
+    process.env.NEXT_PUBLIC_API_URL + `/v1/tags`,
+    {
+      method: "GET",
+    },
+  );
+  if (response.ok) {
+    return response.json();
+  } else {
+    const errorResponse = await response.json();
+    alert(`Failed to fetch tags: ${errorResponse.error}`);
+  }
+}
+
+// delete tag
+async function deleteAvailableTagFn(tag: Tag) {
+  const response = await fetchWithAuth(
+    process.env.NEXT_PUBLIC_API_URL + `/v1/categories/${tag.id}/`,
+    {
+      method: "DELETE",
+    },
+  );
+  if (response.ok) {
+    return response;
+  } else {
+    const errorResponse = await response.json();
+    alert(`Failed to delete: ${tag.name}: ${errorResponse.error}`);
   }
 }

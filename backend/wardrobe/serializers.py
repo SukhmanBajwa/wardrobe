@@ -6,14 +6,15 @@ from .models import ClothingItem, Category, ClothingItemTag, Tag
 
 
 class ClothingItemSerializer(serializers.ModelSerializer):
-    category = serializers.StringRelatedField(
-        many=False
-    )  # This will display the category name instead of the ID
-    category_name = serializers.CharField(
-        write_only=True, required=False
-    )  # This will accept the name of category white POST
+    # Below StringRelatedField calls the str() on model: Category, and in category model __str__ return the name
+    category = serializers.StringRelatedField(many=False)
+    # Below accepts string of chars and only writes to it.
+    category_name = serializers.CharField(write_only=True, required=False)
+    # Below SerializerMethodField expects a method name get_tags to compute the value of tags
     tags = serializers.SerializerMethodField()
+
     new_tags = serializers.CharField(write_only=True, required=False)
+    # Expect method named get_image_url to compute value for image_url
     image_url = serializers.SerializerMethodField()
 
     def get_image_url(self, obj):
@@ -92,3 +93,13 @@ class CategoriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ["id", "name"]
+
+        read_only_tags = ["user"]
+
+
+class TagsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ["id", "name", "source"]
+
+        read_only_tags = ["user"]

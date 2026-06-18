@@ -1,8 +1,9 @@
 "use client";
 import Categories from "@/components/Categories";
+import Tags from "@/components/Tags";
 import { useLoginData } from "@/functions/userLoginState";
 import {
-  Tags,
+  Tags as TagsIcon,
   UserPen,
   Shapes,
   Sparkles,
@@ -56,7 +57,7 @@ const SECTIONS: SettingsSection[] = [
         key: "tags",
         label: "Tags",
         description: "Manage tags used across items",
-        icon: Tags,
+        icon: TagsIcon,
       },
       // {
       //   key: "recommendations",
@@ -119,8 +120,11 @@ const SECTIONS: SettingsSection[] = [
   // },
 ];
 
-export default function OurSettings() {
-  const [modalOpen, setModalOpen] = useState<string | null>(null);
+export default function OurSettings({
+  modal,
+}: {
+  modal: (key: string) => void;
+}) {
   // the colon syntax data: user means "take the property called data, but call it user in my local scope instead.
   const { data: user } = useLoginData();
 
@@ -150,7 +154,7 @@ export default function OurSettings() {
                   <button
                     key={item.key}
                     type="button"
-                    onClick={() => setModalOpen(item.key)}
+                    onClick={() => modal(item.key)}
                     className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-white/5 active:bg-white/10"
                   >
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-800 text-gray-300">
@@ -179,7 +183,7 @@ export default function OurSettings() {
         {/* Logout */}
         <button
           type="button"
-          onClick={() => setModalOpen("logout")}
+          onClick={() => modal("logout")}
           className="flex w-full items-center gap-3 rounded-2xl border border-gray-800 bg-gray-900/50 px-4 py-3 text-left text-red-400 transition hover:bg-red-500/10 hover:text-red-300 active:scale-[0.99]"
         >
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10">
@@ -188,10 +192,6 @@ export default function OurSettings() {
           <span className="text-sm font-medium">Log out</span>
         </button>
       </div>
-
-      {modalOpen === "categories" && (
-        <Categories onClose={() => setModalOpen(null)} />
-      )}
     </div>
   );
 }

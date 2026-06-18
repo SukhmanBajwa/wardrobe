@@ -4,8 +4,8 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsOwner
-from .serializers import ClothingItemSerializer, CategoriesSerializer
-from .models import ClothingItem, Category
+from .serializers import ClothingItemSerializer, CategoriesSerializer, TagsSerializer
+from .models import ClothingItem, Category, Tag
 from rest_framework import filters
 from ai_recommendations import services
 
@@ -72,3 +72,19 @@ class ClothesCategoriesViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         print(serializer.validated_data)
         serializer.save()
+
+
+class TagsViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsOwner]
+    serializer_class = TagsSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Tag.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        serializer.save(user=user)
+
+    def perform_destroy(self, instance):
+        instance.delete()

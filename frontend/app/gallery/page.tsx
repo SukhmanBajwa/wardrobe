@@ -11,6 +11,8 @@ import ItemForm from "@/components/ItemForm";
 import { useClothingItems } from "@/functions/clothingItems";
 import capitalize from "@/functions/capitalize";
 import OurSettings from "@/components/OurSettings";
+import Categories from "@/components/Categories";
+import Tags from "@/components/Tags";
 
 export default function Gallery() {
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
@@ -21,6 +23,7 @@ export default function Gallery() {
   const [searchParam, setSearchParam] = useState<string>("");
   const [logout, setLogout] = useState(false);
   const [toggleSettings, setToggleSettings] = useState<boolean>(false);
+  const [settingsModal, setSettingsModal] = useState<string | null>(null);
 
   const { getAllItems, getCategories } = useClothingItems({
     search: searchParam,
@@ -37,22 +40,26 @@ export default function Gallery() {
       ]
     : [{ id: 0, name: "All" }];
 
+  const onSettingMenuSelect = (modal: string) => {
+    setSettingsModal(modal);
+  };
+
   useEffect(() => {
-    if (!toggleSettings) return;
+    if (!settingsModal) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setToggleSettings(false);
+      if (e.key === "Escape") setSettingsModal(null);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [toggleSettings]);
+  }, [settingsModal]);
 
   return (
     <div className="flex flex-col min-h-screen min-w-screen bg-linear-to-br from-gray-950 via-gray-900 to-indigo-950">
       <div
         className={`transition-all duration-300 ease-in-out ${
-          toggleSettings ? "opacity-50 pointer-events-auto" : "opacity-100"
+          settingsModal ? "opacity-50 pointer-events-auto" : "opacity-100"
         }`}
-        onClick={() => (toggleSettings ? setToggleSettings(false) : null)}
+        onClick={() => toggleSettings && setToggleSettings(false)}
       >
         <div className="flex flex-col">
           <header className="border-b border-gray-800 px-4 py-4 sm:px-6">
@@ -71,9 +78,7 @@ export default function Gallery() {
                 <button
                   type="button"
                   onClick={() => {
-                    toggleSettings
-                      ? setToggleSettings(false)
-                      : setToggleSettings(true);
+                    setToggleSettings(toggleSettings ? false : true);
                   }}
                   className="cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white active:scale-95"
                 >
@@ -184,7 +189,7 @@ export default function Gallery() {
 
       <aside
         className={`fixed right-0 top-0 z-50 h-screen w-64 max-w-full border-l border-gray-800 bg-gray-950 shadow-2xl transition-transform duration-300 ease-in-out ${
-          toggleSettings
+          toggleSettings === true
             ? "translate-x-0"
             : "translate-x-full pointer-events-none"
         }`}
@@ -197,9 +202,15 @@ export default function Gallery() {
           <X size={20} />
         </button>
         <div className="h-full overflow-y-auto">
-          <OurSettings />
+          <OurSettings modal={onSettingMenuSelect} />
         </div>
       </aside>
+      {settingsModal === "categories" && (
+        <Categories onClose={() => setSettingsModal(null)} />
+      )}
+      {settingsModal === "tags" && (
+        <Tags onClose={() => setSettingsModal(null)} />
+      )}
     </div>
   );
 }
