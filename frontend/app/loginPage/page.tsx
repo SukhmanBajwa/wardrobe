@@ -2,22 +2,22 @@
 
 import Image from "next/image";
 import { useEffect } from "react";
-import { sendLogin } from "@/functions/auth";
 import { useRouter } from "next/navigation";
-import { useLoginData } from "@/functions/userLoginState";
+import { useUserData, useAuth } from "@/functions/auth";
 import { useQueryClient } from "@tanstack/react-query";
 
-export default function Login() {
+export default function LoginPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   // the colon syntax data: user means "take the property called data, but call it user in my local scope instead.
-  const { data: user } = useLoginData();
+  const { userData } = useUserData();
+  const { Login } = useAuth();
 
   useEffect(() => {
-    if (user) {
+    if (userData.data) {
       router.push("/gallery");
     }
-  }, [user, router]);
+  }, [userData.data, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4">
@@ -46,10 +46,10 @@ export default function Login() {
               const username = formData.get("username") as string;
               const password = formData.get("password") as string;
 
-              const loginResponse: Response = await sendLogin(
+              const loginResponse: Response = await Login({
                 username,
                 password,
-              );
+              });
               if (loginResponse.ok) {
                 await queryClient.invalidateQueries({ queryKey: ["whoami"] });
                 router.push("/gallery");
@@ -100,7 +100,7 @@ export default function Login() {
           <p className="mt-6 text-center text-sm text-gray-500">
             Sign in with{" "}
             <a
-              href="/login"
+              href="/loginPage"
               className="text-indigo-400 hover:text-indigo-300 font-medium transition"
             >
               Google

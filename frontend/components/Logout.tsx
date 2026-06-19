@@ -13,11 +13,11 @@ export default function Logout() {
         },
       );
       if (res.ok) {
-        router.push("/login");
+        router.push("/loginPage");
       }
     }
     sendLogout();
-  });
+  }, []);
   return (
     <>
       <h1> Thank you for visiting. You have been logged out </h1>

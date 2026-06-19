@@ -1,7 +1,7 @@
 "use client";
 import Categories from "@/components/Categories";
 import Tags from "@/components/Tags";
-import { useLoginData } from "@/functions/userLoginState";
+import { useUserData } from "@/functions/auth";
 import {
   Tags as TagsIcon,
   UserPen,
@@ -126,7 +126,7 @@ export default function OurSettings({
   modal: (key: string) => void;
 }) {
   // the colon syntax data: user means "take the property called data, but call it user in my local scope instead.
-  const { data: user } = useLoginData();
+  const { userData } = useUserData();
 
   return (
     <div className="min-h-screen bg-transparent px-4 py-6">
@@ -137,7 +137,7 @@ export default function OurSettings({
             Settings
           </p>
           <h1 className="text-3xl font-bold text-gray-100">
-            Hello{user ? `, ${user.first_name}` : ""}
+            Hello{userData.data ? `, ${userData.data.first_name}` : ""}
           </h1>
         </div>
 
@@ -183,7 +183,7 @@ export default function OurSettings({
         {/* Logout */}
         <button
           type="button"
-          onClick={() => modal("logout")}
+          onClick={() => modal}
           className="flex w-full items-center gap-3 rounded-2xl border border-gray-800 bg-gray-900/50 px-4 py-3 text-left text-red-400 transition hover:bg-red-500/10 hover:text-red-300 active:scale-[0.99]"
         >
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10">

@@ -5,14 +5,14 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ItemDetail from "@/components/ItemDetail";
-import Logout from "@/components/Logout";
-import { CirclePlus, Settings, LogOut, X } from "lucide-react";
+import { CirclePlus, Settings, LogOut as LogOutIcon, X } from "lucide-react";
 import ItemForm from "@/components/ItemForm";
 import { useClothingItems } from "@/functions/clothingItems";
 import capitalize from "@/functions/capitalize";
 import OurSettings from "@/components/OurSettings";
 import Categories from "@/components/Categories";
 import Tags from "@/components/Tags";
+import { useAuth } from "@/functions/auth";
 
 export default function Gallery() {
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
@@ -21,7 +21,7 @@ export default function Gallery() {
   const [addItemModalOpen, setAddItemModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [searchParam, setSearchParam] = useState<string>("");
-  const [logout, setLogout] = useState(false);
+  const { Logout } = useAuth();
   const [toggleSettings, setToggleSettings] = useState<boolean>(false);
   const [settingsModal, setSettingsModal] = useState<string | null>(null);
 
@@ -87,11 +87,10 @@ export default function Gallery() {
                 <button
                   type="button"
                   className="cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white active:scale-95"
-                  onClick={() => setLogout(true)}
+                  onClick={() => Logout()}
                 >
-                  <LogOut size={20} />
+                  <LogOutIcon size={20} />
                 </button>
-                {logout && <Logout></Logout>}
               </div>
             </div>
 

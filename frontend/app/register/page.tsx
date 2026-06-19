@@ -2,35 +2,22 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { sendLogin } from "@/functions/auth";
-import { WhoAmI } from "@/functions/userLoginState";
+import { useUserData, useAuth } from "@/functions/auth";
 
 export default function Register() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password1, setPassword1] = useState("");
   const [password2, setPassword2] = useState("");
-
-  const [user, setUser] = useState<UserData | null>(null);
-  const [loginState, setLoginState] = useState<boolean>(false);
+  const { userData } = useUserData();
+  const { Login } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    const getUser = async () => {
-      const userData = await WhoAmI();
-      setUser(userData);
-    };
-    getUser();
-  }, []);
-
-  useEffect(() => {
-    const getLoginState = () => {
-      if (user) {
-        router.push("/gallery");
-      }
-    };
-    getLoginState();
-  }, [user]);
+    if (userData.data) {
+      router.push("/gallery");
+    }
+  }, [userData.data, router]);
 
   async function sendRegisteration(
     username: string,
@@ -53,7 +40,10 @@ export default function Register() {
       },
     );
     if (res.ok) {
-      const loginResponse: Response = await sendLogin(username, password1);
+      const loginResponse: Response = await Login({
+        username,
+        password: password1,
+      });
       if (loginResponse.ok) router.push("/gallery");
       else {
         const errorResponse = await loginResponse.json();
@@ -166,14 +156,14 @@ export default function Register() {
           <p className="mt-6 text-center text-sm text-gray-500">
             Already have an account?{" "}
             <a
-              href="/login"
+              href="/loginPage"
               className="text-indigo-400 hover:text-indigo-300 font-medium transition"
             >
               Sign in <br></br>
             </a>
             or with{" "}
             <a
-              href="/login"
+              href="/loginPage"
               className="text-indigo-400 hover:text-indigo-300 font-medium transition"
             >
               Google
