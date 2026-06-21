@@ -5,7 +5,13 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ItemDetail from "@/components/ItemDetail";
-import { CirclePlus, Settings, LogOut as LogOutIcon, X } from "lucide-react";
+import {
+  CirclePlus,
+  Settings,
+  LogOut as LogOutIcon,
+  X,
+  ChevronDownIcon,
+} from "lucide-react";
 import ItemForm from "@/components/ItemForm";
 import { useClothingItems } from "@/functions/clothingItems";
 import capitalize from "@/functions/capitalize";
@@ -13,6 +19,12 @@ import OurSettings from "@/components/OurSettings";
 import Categories from "@/components/Categories";
 import Tags from "@/components/Tags";
 import { useAuth } from "@/functions/auth";
+import {
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
 
 export default function Gallery() {
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
@@ -98,25 +110,65 @@ export default function Gallery() {
               <ul className="flex flex-wrap gap-2">
                 {categoriesAvailable &&
                   categoriesAvailable.map(
-                    (category: { id: number; name: string }) => (
-                      <li
-                        key={category.id}
-                        className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-light transition ${
-                          categoryFilter === category.name
-                            ? "border-indigo-500 bg-indigo-500 text-white"
-                            : "border-gray-600 text-gray-300 hover:border-gray-400 hover:text-white"
-                        }`}
-                        onClick={() => {
-                          setCategoryFilter(category.name);
-                          if (category.name == "All" && searchParam) {
-                            setSearchParam("");
-                          }
-                        }}
-                      >
-                        {capitalize(category.name)}
-                      </li>
-                    ),
+                    (category: { id: number; name: string }, index: number) =>
+                      index <= 6 ? (
+                        <li
+                          key={category.id}
+                          className={`cursor-pointer rounded-full border-2 px-3 py-1 text-xs    transition ${
+                            categoryFilter === category.name
+                              ? "border-indigo-500 bg-indigo-500 text-white"
+                              : "border-gray-500  hover:border-gray-400 hover:text-white"
+                          }`}
+                          onClick={() => {
+                            setCategoryFilter(category.name);
+                            if (category.name == "All" && searchParam) {
+                              setSearchParam("");
+                            }
+                          }}
+                        >
+                          {capitalize(category.name)}
+                        </li>
+                      ) : null,
                   )}
+                <li>
+                  <Listbox value={categoryFilter} onChange={setCategoryFilter}>
+                    <ListboxButton className="flex items-center justify-evenly gap-1 cursor-pointer rounded-full border-2 border-gray-500 p`x-3 w-17 py-1 text-xs text-gray-300 hover:border-gray-400">
+                      {categoryFilter &&
+                        capitalize(
+                          (categoriesAvailable
+                            .slice(7)
+                            .find((cat) => cat.name === categoryFilter)?.name ??
+                            "More") as string,
+                        )}
+                      <ChevronDownIcon
+                        className="group pointer-events-none shrink-0 size-3 fill-white/60"
+                        aria-hidden="true"
+                      />
+                    </ListboxButton>
+                    <ListboxOptions
+                      anchor="bottom start"
+                      className="absolute z-10 mt-1 bg-gray-900 border border-gray-700 rounded-lg shadow-lg"
+                    >
+                      {categoriesAvailable &&
+                        categoriesAvailable
+                          .slice(7)
+                          .map(
+                            (
+                              category: { id: number; name: string },
+                              index: number,
+                            ) => (
+                              <ListboxOption
+                                className="px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 cursor-pointer"
+                                key={category.id}
+                                value={category.name}
+                              >
+                                {capitalize(category.name)}
+                              </ListboxOption>
+                            ),
+                          )}
+                    </ListboxOptions>
+                  </Listbox>
+                </li>
               </ul>
 
               <input
@@ -136,7 +188,7 @@ export default function Gallery() {
               <p className="px-1 pt-6 text-sm text-gray-400">
                 {clothingItems.length} items
               </p>
-              <div className="my-6 flex flex-wrap items-start gap-6">
+              <div className="my-6 flex flex-wrap items-center pl-5 gap-6">
                 {clothingItems.map((item: ClothingItem) => (
                   <ClothingItemCard
                     key={item.id}

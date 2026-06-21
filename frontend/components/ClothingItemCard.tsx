@@ -11,7 +11,7 @@ export default function ClothingItemCard({
 }: ClothingItemCardProps) {
   const { name, image_url, tags, description, category } = item;
   return (
-    <div className="relative sm:w-full md:w-59">
+    <div className="relative sm:w-screen md:w-59">
       <div className="absolute top-2 right-2 z-10 mix-blend-difference text-white cursor-pointer rounded-2xl hover:bg-green-900 p-1 border-0 hover:border hover:scale-110 transition ease-in-out duration-300">
         <Pencil size={20} onClick={() => onEditSelect(item)} />
       </div>
