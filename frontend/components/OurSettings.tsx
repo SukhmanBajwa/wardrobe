@@ -32,17 +32,17 @@ type SettingsSection = {
 };
 
 const SECTIONS: SettingsSection[] = [
-  // {
-  //   heading: "Account",
-  //   items: [
-  //     {
-  //       key: "account",
-  //       label: "Account",
-  //       description: "Profile, email, and password",
-  //       icon: UserPen,
-  //     },
-  //   ],
-  // },
+  {
+    heading: "Account",
+    items: [
+      {
+        key: "account",
+        label: "Account",
+        description: "Profile, and password",
+        icon: UserPen,
+      },
+    ],
+  },
   {
     heading: "Wardrobe",
     items: [
