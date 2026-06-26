@@ -1,6 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { fetchWithAuth } from "./fetchWithAuth";
+import { friendlyError } from "./friendlyError";
 
 const useUserData = () => {
   const userData = useQuery({
@@ -22,7 +24,7 @@ const useAuth = () => {
     username: string;
     password: string;
   }) => {
-    const res = await fetch(
+    const response = await fetch(
       process.env.NEXT_PUBLIC_API_URL + "/api/auth/login/",
       {
         method: "POST",
@@ -34,25 +36,74 @@ const useAuth = () => {
         }),
       },
     );
-    return res;
+    return response;
   };
 
   const Logout = async () => {
-    const res = await fetch(
+    const response = await fetch(
       process.env.NEXT_PUBLIC_API_URL + "/api/auth/logout/",
       {
         method: "POST",
         credentials: "include",
       },
     );
-    if (res.ok) {
+    if (response.ok) {
       queryClient.invalidateQueries({ queryKey: ["whoami"] });
       router.push("/loginPage/");
-      return res;
+      return response;
     }
   };
 
-  return { Login, Logout };
+  const ChangePassword = async (password1: string, password2: string) => {
+    const response = await fetchWithAuth(
+      process.env.NEXT_PUBLIC_API_URL + `/api/auth/password/change/`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify({
+          new_password1: password1,
+          new_password2: password2,
+        }),
+      },
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+  };
+
+  const Register = async (
+    username: string,
+    email: string,
+    password1: string,
+    password2: string,
+  ) => {
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + "/api/auth/registration/",
+      {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username,
+          email: email,
+          password1: password1,
+          password2: password2,
+        }),
+      },
+    );
+    if (!response.ok) {
+      throw friendlyError(response.status, "register");
+    }
+    const loginResponse: Response = await Login({
+      username,
+      password: password1,
+    });
+    if (loginResponse.ok) router.push("/gallery");
+  };
+
+  return { Login, Logout, ChangePassword, Register };
 };
 
 const User = async () => {

@@ -13,12 +13,12 @@ export default function ClothingItemCard({
   return (
     <div className="relative sm:w-screen md:w-59">
       <div className="absolute top-2 right-2 z-10 mix-blend-difference text-white cursor-pointer rounded-2xl hover:bg-green-900 p-1 border-0 hover:border hover:scale-110 transition ease-in-out duration-300">
-        <Pencil size={20} onClick={() => onEditSelect(item)} />
+        <Pencil size={20} onClick={() => onEditSelect!(item)} />
       </div>
       <div
         className="bg-gray-800/60 rounded-2xl shadow-2xl  border border-gray-700/50 border-t-2 cursor-pointer hover:shadow-blue-100 hover:shadow-sm hover:border-gray-500/50 active:shadow-green-100 active:shadow-sm active:border-gray-500/50 transition duration-300 ease-in-out"
         onClick={() => {
-          onItemSelect(item);
+          onItemSelect!(item);
         }}
       >
         <div className="border-b bg-graw-900 border-gray-700/50">

@@ -1,6 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import { fetchWithAuth } from "./fetchWithAuth";
-import { Variable } from "lucide-react";
+import { friendlyError } from "./friendlyError";
 
 // Hook
 
@@ -185,6 +190,7 @@ const useClothingItems = ({
     },
     onSettled: (data, error, variables) => {
       queryClient.invalidateQueries({ queryKey: ["allTags"] });
+      queryClient.invalidateQueries({ queryKey: ["clothingItems"] });
     },
   });
 
@@ -208,12 +214,9 @@ export { useClothingItems };
 async function addClothingItemFn(formData: FormData) {
   const response = await fetchWithAuth(
     process.env.NEXT_PUBLIC_API_URL + "/v1/clothing_items/",
-    {
-      method: "POST",
-
-      body: formData,
-    },
+    { method: "POST", body: formData },
   );
+  if (!response.ok) throw friendlyError(response.status, "add clothing item");
   return response;
 }
 
@@ -227,198 +230,120 @@ async function getClothingItems(
       ? `&search=${search}`
       : `?search=${search}`
     : "";
-  try {
-    const res = await fetchWithAuth(
-      process.env.NEXT_PUBLIC_API_URL +
-        "/v1/clothing_items/" +
-        categoryParam +
-        searchParam,
-      {
-        method: "GET",
-      },
-    );
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching items:", error);
-  }
+  const response = await fetchWithAuth(
+    process.env.NEXT_PUBLIC_API_URL +
+      "/v1/clothing_items/" +
+      categoryParam +
+      searchParam,
+    { method: "GET" },
+  );
+  if (!response.ok)
+    throw friendlyError(response.status, "fetch clothing items");
+  return await response.json();
 }
 
 async function getClothingItem(id: number) {
-  const res = await fetchWithAuth(
+  const response = await fetchWithAuth(
     process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}`,
-    {
-      method: "GET",
-    },
+    { method: "GET" },
   );
-  if (!res.ok) throw new Error("Failed to fetch item");
-  return res.json();
+  if (!response.ok) throw friendlyError(response.status, "fetch clothing item");
+  return response.json();
 }
 
 async function editClothingItemFn(id: number, formData: FormData) {
-  try {
-    let bodyData: FormData | Record<string, string> = {};
-    if (formData.has("image")) {
-      bodyData = formData;
-    } else {
-      for (let [key, value] of formData.entries()) {
-        // "bodyData as" | "value as" means trust me bro they are this type for now. Just to make compiler to stop complaining.
-        (bodyData as Record<string, string>)[key] = value as string;
-      }
+  let bodyData: FormData | Record<string, string> = {};
+  if (formData.has("image")) {
+    bodyData = formData;
+  } else {
+    for (let [key, value] of formData.entries()) {
+      (bodyData as Record<string, string>)[key] = value as string;
     }
-    const res = await fetchWithAuth(
-      process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}/`,
-      {
-        method: "PATCH",
-
-        headers: formData.has("image")
-          ? undefined
-          : { "Content-Type": "application/json" },
-        body: formData.has("image")
-          ? (bodyData as FormData)
-          : JSON.stringify(bodyData),
-      },
-    );
-    if (!res.ok) {
-      throw new Error(`HTTP error! Status: ${res.status}`);
-    }
-    return res.json();
-  } catch (error) {
-    console.error("Error editing item:", error);
   }
+  const response = await fetchWithAuth(
+    process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}/`,
+    {
+      method: "PATCH",
+      headers: formData.has("image")
+        ? undefined
+        : { "Content-Type": "application/json" },
+      body: formData.has("image")
+        ? (bodyData as FormData)
+        : JSON.stringify(bodyData),
+    },
+  );
+  if (!response.ok) throw friendlyError(response.status, "edit clothing item");
+  return response.json();
 }
 
-// Soft delete — sends DELETE request, backend sets is_deleted=True instead of removing the record
 async function deleteClothingItemFn(id: number) {
-  try {
-    const res = await fetchWithAuth(
-      process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}/`,
-      {
-        headers: { "Content-Type": "application/json" },
-        method: "DELETE",
-      },
-    );
-    if (!res.ok) {
-      throw new Error("HTTP error! Status: ${res.status}");
-    }
-    return res;
-  } catch (error) {
-    console.error("Error deleting item:", error);
-  }
+  const response = await fetchWithAuth(
+    process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}/`,
+    { headers: { "Content-Type": "application/json" }, method: "DELETE" },
+  );
+  if (!response.ok)
+    throw friendlyError(response.status, "delete clothing item");
+  return response;
 }
 
-// fetch available categories.
 async function fetchAvailableCategoriesFn() {
   const response = await fetchWithAuth(
     process.env.NEXT_PUBLIC_API_URL + `/v1/categories/`,
-    {
-      method: "GET",
-    },
+    { method: "GET" },
   );
-  if (response.ok) {
-    const data = await response.json();
-    return data;
-  } else {
-    const errorResponse = await response.json();
-    alert(`Failed to fectch categories: ${errorResponse.error}`);
-  }
+  if (!response.ok) throw friendlyError(response.status, "fetch categories");
+  return response.json();
 }
 
-// add new category
-
 async function addNewCategoryFn(name: string) {
-  const data = {
-    name: `${name}`,
-  };
   const response = await fetchWithAuth(
     process.env.NEXT_PUBLIC_API_URL + `/v1/categories/`,
     {
       method: "POST",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
     },
   );
-  if (response.ok) {
-    const res = await response.json();
-    return res;
-  } else {
-    const errorResponse = await response.json();
-    alert(`Failed to add new category: ${name}: ${errorResponse.error}`);
-  }
+  if (!response.ok) throw friendlyError(response.status, "add category");
+  return response.json();
 }
-// edit available category
+
 async function editAvailableCategoryFn(category: Category) {
-  console.log(category.name);
-  const data = {
-    id: `${category.id}`,
-    name: `${category.name}`,
-  };
   const response = await fetchWithAuth(
     process.env.NEXT_PUBLIC_API_URL + `/v1/categories/${category.id}/`,
     {
       method: "PATCH",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: `${category.id}`, name: `${category.name}` }),
     },
   );
-  if (response.ok) {
-    const res = await response.json();
-    return res;
-  } else {
-    const errorResponse = await response.json();
-    alert(`Failed to edit: ${category.name}: ${errorResponse.error}`);
-  }
+  if (!response.ok) throw friendlyError(response.status, "edit category");
+  return response.json();
 }
 
-// delete available category
 async function deleteAvailableCategoryFn(category: Category) {
   const response = await fetchWithAuth(
     process.env.NEXT_PUBLIC_API_URL + `/v1/categories/${category.id}/`,
-    {
-      method: "DELETE",
-    },
+    { method: "DELETE" },
   );
-  if (response.ok) {
-    return response;
-  } else {
-    const errorResponse = await response.json();
-    alert(`Failed to delete: ${category.name}: ${errorResponse.error}`);
-  }
+  if (!response.ok) throw friendlyError(response.status, "delete category");
+  return response;
 }
 
-// get tags
 async function getTagsFn() {
   const response = await fetchWithAuth(
-    process.env.NEXT_PUBLIC_API_URL + `/v1/tags`,
-    {
-      method: "GET",
-    },
+    process.env.NEXT_PUBLIC_API_URL + `/v1/tags/`,
+    { method: "GET" },
   );
-  if (response.ok) {
-    return response.json();
-  } else {
-    const errorResponse = await response.json();
-    alert(`Failed to fetch tags: ${errorResponse.error}`);
-  }
+  if (!response.ok) throw friendlyError(response.status, "fetch tags");
+  return response.json();
 }
 
-// delete tag
 async function deleteAvailableTagFn(tag: Tag) {
   const response = await fetchWithAuth(
-    process.env.NEXT_PUBLIC_API_URL + `/v1/categories/${tag.id}/`,
-    {
-      method: "DELETE",
-    },
+    process.env.NEXT_PUBLIC_API_URL + `/v1/tags/${tag.id}/`,
+    { method: "DELETE" },
   );
-  if (response.ok) {
-    return response;
-  } else {
-    const errorResponse = await response.json();
-    alert(`Failed to delete: ${tag.name}: ${errorResponse.error}`);
-  }
+  if (!response.ok) throw friendlyError(response.status, "delete tag");
+  return response;
 }

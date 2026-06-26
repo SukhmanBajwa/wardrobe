@@ -1,9 +1,10 @@
 import { useUserData } from "@/functions/auth";
-import { changePassword } from "@/functions/password";
+import { useAuth } from "@/functions/auth";
 import { X } from "lucide-react";
 import { useState } from "react";
 
 export default function Account({ onClose }: { onClose: () => void }) {
+  const { ChangePassword } = useAuth();
   const { userData } = useUserData();
   const [password1, setPassword1] = useState<string>("");
   const [password2, setPassword2] = useState<string>("");
@@ -103,7 +104,7 @@ export default function Account({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               disabled={!canSubmit}
-              onClick={() => changePassword(password1, password2)}
+              onClick={() => ChangePassword(password1, password2)}
               className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-indigo-600"
             >
               Change password

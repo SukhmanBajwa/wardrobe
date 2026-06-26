@@ -24,6 +24,7 @@ export default function ItemDetail({
     useState<boolean>(false);
   const [selectedRecommendation, setSelectedRecommendation] =
     useState<AiRecommendation | null>(null);
+  const [deleting, setDeleting] = useState<boolean>(false);
 
   useEffect(() => {
     if (!getAiRecommendation.isFetching && refreshingRecommendations) {
@@ -44,6 +45,37 @@ export default function ItemDetail({
         className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
+        {deleting && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-xs">
+            <div className="rounded-2xl border border-gray-700 bg-gray-900 p-6 shadow-2xl max-w-sm w-full mx-4">
+              <h3 className="text-lg font-bold text-white mb-2">
+                Delete item?
+              </h3>
+              <p className="text-sm text-gray-400 mb-6">
+                This action cannot be undone.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setDeleting(false)}
+                  className="px-4 py-2 text-sm text-gray-300 hover:text-white transition hover:bg-gray-100/5 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    await deleteClothingItem.mutateAsync(item.id);
+
+                    onDelete!();
+                    onClose();
+                  }}
+                  className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-lg   transition hover:bg-red-500/50 hover:text-red-300 active:scale-95"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Header */}
         <div className="flex items-center justify-between gap-4 border-b border-gray-700/60 px-6 py-4">
           <h1 className="text-xl font-bold text-gray-100">Item details</h1>
@@ -52,26 +84,22 @@ export default function ItemDetail({
             <button
               type="button"
               onClick={() => {
-                onEdit();
+                onEdit!();
                 onClose();
               }}
               className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white active:scale-95"
             >
               Edit
             </button>
-            <button
+            {/* <button
               type="button"
               className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white active:scale-95"
             >
               Share
-            </button>
+            </button> */}
             <button
               type="button"
-              onClick={async () => {
-                await deleteClothingItem.mutateAsync(item.id);
-                onDelete();
-                onClose();
-              }}
+              onClick={() => setDeleting(true)}
               className="rounded-lg px-3 py-1.5 text-sm font-medium text-red-400 transition hover:bg-red-500/10 hover:text-red-300 active:scale-95"
             >
               Delete
@@ -142,7 +170,23 @@ export default function ItemDetail({
               </button>
             </div>
 
-            {refreshingRecommendations ? (
+            {getAiRecommendation.isLoading ? (
+              <div className="flex flex-col gap-2">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 rounded-2xl bg-gray-900/80 p-2 animate-pulse"
+                  >
+                    <div className="h-20 w-20 flex-shrink-0 rounded-lg bg-gray-700" />
+                    <div className="flex flex-1 flex-col gap-2">
+                      <div className="h-3 w-1/2 rounded bg-gray-700" />
+                      <div className="h-3 w-3/4 rounded bg-gray-700" />
+                      <div className="h-3 w-2/3 rounded bg-gray-700" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : refreshingRecommendations ? (
               <div className="flex items-center gap-2 py-6 text-sm text-gray-400">
                 <RefreshCw
                   size={16}

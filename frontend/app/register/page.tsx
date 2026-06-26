@@ -10,7 +10,7 @@ export default function Register() {
   const [password1, setPassword1] = useState("");
   const [password2, setPassword2] = useState("");
   const { userData } = useUserData();
-  const { Login } = useAuth();
+  const { Register } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -18,44 +18,6 @@ export default function Register() {
       router.push("/gallery");
     }
   }, [userData.data, router]);
-
-  async function sendRegisteration(
-    username: string,
-    email: string,
-    password1: string,
-    password2: string,
-  ) {
-    const res = await fetch(
-      process.env.NEXT_PUBLIC_API_URL + "/api/auth/registration/",
-      {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: username,
-          email: email,
-          password1: password1,
-          password2: password2,
-        }),
-      },
-    );
-    if (res.ok) {
-      const loginResponse: Response = await Login({
-        username,
-        password: password1,
-      });
-      if (loginResponse.ok) router.push("/gallery");
-      else {
-        const errorResponse = await loginResponse.json();
-        alert(
-          `Login after registration failed: ${JSON.stringify(errorResponse)}`,
-        );
-      }
-    } else {
-      const errorResponse = await res.json();
-      alert(`Registration failed: ${JSON.stringify(errorResponse)}`);
-    }
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4">
@@ -82,7 +44,7 @@ export default function Register() {
             className="flex flex-col gap-5"
             onSubmit={async (e) => {
               e.preventDefault();
-              await sendRegisteration(username, email, password1, password2);
+              await Register(username, email, password1, password2);
             }}
           >
             <div className="flex flex-col gap-1.5">

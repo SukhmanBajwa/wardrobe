@@ -10,6 +10,7 @@ import {
   ListboxOption,
   ListboxOptions,
 } from "@headlessui/react";
+import { redirect } from "next/dist/server/api-utils";
 
 export default function ItemForm({
   onClose,
@@ -43,12 +44,10 @@ export default function ItemForm({
 
   const buildFormData: () => void = async () => {
     if (!categoryName) {
-      alert("Please select a category");
-      return;
+      return <div className="text-red">Please select a category</div>;
     }
     if (!image) {
-      alert("Please select a category");
-      return;
+      return <div className="text-red">Please upload an Image</div>;
     }
 
     if (name !== item?.name) formData.append("name", name);
@@ -70,6 +69,8 @@ export default function ItemForm({
 
   const imgPreview =
     image instanceof File ? URL.createObjectURL(image) : (image ?? null);
+  const canSubmit = image && name.length > 0 && categoryName.length > 0;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 shadow-2xl">
@@ -89,11 +90,12 @@ export default function ItemForm({
             </button>
             <button
               type="button"
+              disabled={!canSubmit}
               onClick={() => {
                 buildFormData();
                 onClose();
               }}
-              className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-500 active:scale-95"
+              className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-500 active:scale-95 disabled:opacity-50 disabled:hover:bg-indigo-600"
             >
               Save Item
             </button>

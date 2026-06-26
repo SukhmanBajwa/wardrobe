@@ -51,8 +51,7 @@ const fetchAiRecommendations = async (id: number) => {
       throw new Error(`No recommendations found for ${id}`);
     return data;
   } else {
-    const data = await res.json();
-    alert(`Failed to fetch recommendations: ${JSON.stringify(data)}`);
+    return res.json();
   }
 };
 
@@ -65,7 +64,7 @@ const refreshAiRecommendations = async (id: number) => {
     },
   );
   if (!res.ok) {
-    alert(`Failed to fetch recommendations: ${JSON.stringify(res.json())}`);
+    return res.json();
   }
   return res;
 };
