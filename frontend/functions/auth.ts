@@ -103,7 +103,23 @@ const useAuth = () => {
     if (loginResponse.ok) router.push("/gallery");
   };
 
-  return { Login, Logout, ChangePassword, Register };
+  const GoogleLogin = async ({ code }: { code: string }) => {
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + "/api/auth/google/",
+      {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      },
+    );
+    if (response.ok) {
+      await queryClient.invalidateQueries({ queryKey: ["whoami"] });
+      router.push("/gallery");
+    }
+  };
+
+  return { Login, Logout, ChangePassword, Register, GoogleLogin };
 };
 
 const User = async () => {

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUserData, useAuth } from "@/functions/auth";
 import { useQueryClient } from "@tanstack/react-query";
+import { useGoogleLogin } from "@react-oauth/google";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
@@ -12,7 +13,14 @@ export default function LoginPage() {
   const queryClient = useQueryClient();
   // the colon syntax data: user means "take the property called data, but call it user in my local scope instead.
   const { userData } = useUserData();
-  const { Login } = useAuth();
+  const { Login, GoogleLogin } = useAuth();
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (response) => {
+      await GoogleLogin({ code: response.code });
+    },
+    flow: "auth-code",
+  });
 
   useEffect(() => {
     if (userData.data) {
@@ -93,6 +101,7 @@ export default function LoginPage() {
                 className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
               />
             </div>
+
             {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
             <button
               type="submit"
@@ -101,24 +110,28 @@ export default function LoginPage() {
               Login
             </button>
           </form>
-
-          <p className="mt-6 text-center text-sm text-gray-500">
-            Sign in with{" "}
-            <a
-              href="/loginPage"
-              className="text-indigo-400 hover:text-indigo-300 font-medium transition"
+          <div className="mt-2 flex flex-col items-center justify-evenly gap-2 ">
+            <button
+              type="button"
+              onClick={() => googleLogin()}
+              className="w-full flex items-center justify-center min-h-12 max-h-12 gap-2 py-3 px-4 rounded-lg border border-gray-600 bg-gray-900 text-white hover:bg-gray-800 transition"
             >
-              Google
-            </a>{" "}
-            or Register
+              <Image
+                src="/Google_Favicon_2025.svg"
+                alt="Google Logo"
+                width={25}
+                height={25}
+              />
+              Sign in with Google
+            </button>
             <a
               href="/register"
               className="text-indigo-400 hover:text-indigo-300 font-medium transition"
             >
               {" "}
-              here
+              Register here
             </a>
-          </p>
+          </div>
         </div>
       </div>
     </div>
