@@ -22,7 +22,7 @@ export default function Categories({ onClose }: { onClose: () => void }) {
   >();
   const sendEditForCategory = (id: number, name: string) => {
     const category: Category = { id, name };
-    editCategory.mutateAsync(category);
+    editCategory.mutate(category);
   };
 
   return (
@@ -53,7 +53,7 @@ export default function Categories({ onClose }: { onClose: () => void }) {
               onChange={(e) => setNewCategory(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key == "Enter") {
-                  addCategory.mutateAsync(newCategory!);
+                  addCategory.mutate(newCategory!);
                   setNewCategory(null);
                 }
               }}
@@ -64,7 +64,7 @@ export default function Categories({ onClose }: { onClose: () => void }) {
               disabled={!newCategory}
               className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white transition hover:bg-indigo-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-indigo-600"
               onClick={() => {
-                addCategory.mutateAsync(newCategory!);
+                addCategory.mutate(newCategory!);
                 setNewCategory(null);
               }}
             >
@@ -122,7 +122,7 @@ export default function Categories({ onClose }: { onClose: () => void }) {
                       </button>
                       <button
                         type="button"
-                        onClick={() => deleteCategory.mutateAsync(category)}
+                        onClick={() => deleteCategory.mutate(category)}
                         aria-label={`Delete ${category.name}`}
                         className="rounded-lg px-2 py-1 text-sm text-gray-400 transition hover:bg-red-500/10 hover:text-red-300 active:scale-95"
                       >

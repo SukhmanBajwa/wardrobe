@@ -36,7 +36,7 @@ export default function Tags({ onClose }: { onClose: () => void }) {
                   #{tag.name}
                   <button
                     type="button"
-                    onClick={() => deleteTag.mutateAsync(tag)}
+                    onClick={() => deleteTag.mutate(tag)}
                     aria-label={`Delete ${tag.name}`}
                     className="rounded-full p-0.5 text-gray-500 transition hover:bg-red-500/15 hover:text-red-400 active:scale-90"
                   >

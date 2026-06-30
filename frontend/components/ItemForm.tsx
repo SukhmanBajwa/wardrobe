@@ -1,5 +1,12 @@
 "use client";
-import { X, Plus, Trash2, CheckIcon, ChevronDownIcon } from "lucide-react";
+import {
+  X,
+  Plus,
+  Trash2,
+  CheckIcon,
+  ChevronDownIcon,
+  LoaderCircle,
+} from "lucide-react";
 import { useClothingItems } from "@/functions/clothingItems";
 import { useEffect, useState } from "react";
 import capitalize from "@/functions/capitalize";
@@ -10,7 +17,7 @@ import {
   ListboxOption,
   ListboxOptions,
 } from "@headlessui/react";
-import { redirect } from "next/dist/server/api-utils";
+import { Edu_TAS_Beginner } from "next/font/google";
 
 export default function ItemForm({
   onClose,
@@ -21,7 +28,10 @@ export default function ItemForm({
 }) {
   const [name, setName] = useState(item?.name ?? "");
   const [description, setDescription] = useState(item?.description ?? "");
-  const [image, setImage] = useState((item?.image ?? null) || undefined);
+  // For new items: undefined (must upload). For edits: seed with existing URL so canSubmit is true even without re-uploading.
+  const [image, setImage] = useState<File | string | undefined>(
+    item?.image_url ?? undefined,
+  );
   const [categoryName, setCategoryName] = useState(item?.category ?? "");
   const [tags, setTags] = useState<string[]>(item?.tags ?? []);
   const [tagInput, setTagInput] = useState("");
@@ -42,13 +52,9 @@ export default function ItemForm({
 
   const categoriesAvailable = getCategories.data;
 
-  const buildFormData: () => void = async () => {
-    if (!categoryName) {
-      return <div className="text-red">Please select a category</div>;
-    }
-    if (!image) {
-      return <div className="text-red">Please upload an Image</div>;
-    }
+  const buildFormData: () => void = () => {
+    if (!categoryName) return;
+    if (!image) return; // always required (edit pre-seeds this with image_url)
 
     if (name !== item?.name) formData.append("name", name);
     if (tags !== item?.tags) formData.append("new_tags", JSON.stringify(tags));
@@ -56,20 +62,25 @@ export default function ItemForm({
       formData.append("description", description);
     if (categoryName !== item?.category)
       formData.append("category_name", categoryName);
-    if (image !== item?.image) formData.append("image", image as Blob);
+    if (image instanceof File) formData.append("image", image as Blob);
 
     if (!item) {
-      await addClothingItem.mutateAsync(formData);
-    }
-    if ([...formData.entries()].length === 0) return;
-    if (item) {
-      await editClothingItem.mutateAsync({ id: item.id, formData: formData });
+      addClothingItem.mutate(formData);
+    } else {
+      if ([...formData.entries()].length === 0) return;
+      editClothingItem.mutate({ id: item.id, formData: formData });
     }
   };
 
   const imgPreview =
     image instanceof File ? URL.createObjectURL(image) : (image ?? null);
   const canSubmit = image && name.length > 0 && categoryName.length > 0;
+
+  useEffect(() => {
+    if (addClothingItem.isSuccess || editClothingItem.isSuccess) {
+      onClose();
+    }
+  }, [addClothingItem.isSuccess, editClothingItem.isSuccess]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
@@ -93,11 +104,20 @@ export default function ItemForm({
               disabled={!canSubmit}
               onClick={() => {
                 buildFormData();
-                onClose();
               }}
-              className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-500 active:scale-95 disabled:opacity-50 disabled:hover:bg-indigo-600"
+              className="flex flex-row items-center justify-between rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-500 active:scale-95 disabled:opacity-50 disabled:hover:bg-indigo-600"
             >
-              Save Item
+              {addClothingItem.isPending || editClothingItem.isPending ? (
+                <>
+                  Saving item
+                  <LoaderCircle
+                    size={30}
+                    className="animate-spin"
+                  ></LoaderCircle>
+                </>
+              ) : (
+                "Save Item"
+              )}
             </button>
             <button
               type="button"

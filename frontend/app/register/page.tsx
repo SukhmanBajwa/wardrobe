@@ -1,31 +1,25 @@
 "use client";
-import { useRouter } from "next/navigation";
+
 import Image from "next/image";
-import { useState, useEffect, useContext } from "react";
-import { useUserData, useAuth } from "@/functions/auth";
+import { useState, useContext } from "react";
+import { useAuth } from "@/functions/auth";
 import ErrorBanner from "@/components/ErrorBanner";
 import { ErrorContext } from "../context/errorContext";
+import { LoaderCircle } from "lucide-react";
 
 export default function Register() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password1, setPassword1] = useState("");
   const [password2, setPassword2] = useState("");
-  const { userData } = useUserData();
-  const { Register } = useAuth();
-  const router = useRouter();
+  const { registerMutation } = useAuth();
+
   const errorContext = useContext(ErrorContext);
 
   const mismatch =
     password1.length > 0 && password2.length > 0 && password1 !== password2;
   const canSubmit =
     password1.length > 0 && password2.length > 0 && password1 === password2;
-
-  useEffect(() => {
-    if (userData.data) {
-      router.push("/gallery");
-    }
-  }, [userData.data, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4">
@@ -44,6 +38,7 @@ export default function Register() {
           ))}
         </div>
       )}
+
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <Image
@@ -65,9 +60,33 @@ export default function Register() {
         <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-gray-700/50 border-t-2 border-t-indigo-500">
           <form
             className="flex flex-col gap-5"
-            onSubmit={async (e) => {
+            noValidate
+            onSubmit={(e) => {
               e.preventDefault();
-              await Register(username, email, password1, password2);
+              if (!username) {
+                errorContext.setErrorMessages(["Please enter a username"]);
+                return;
+              }
+              if (!email || !email.includes("@")) {
+                errorContext.setErrorMessages([
+                  "Please enter a valid email address",
+                ]);
+                return;
+              }
+              if (!password1) {
+                errorContext.setErrorMessages(["Please enter a password"]);
+                return;
+              }
+              if (!canSubmit) {
+                errorContext.setErrorMessages(["Passwords don't match"]);
+                return;
+              }
+              registerMutation.mutate({
+                username: username,
+                email: email,
+                password1: password1,
+                password2: password2,
+              });
             }}
           >
             <div className="flex flex-col gap-1.5">
@@ -80,6 +99,7 @@ export default function Register() {
               <input
                 id="username"
                 type="text"
+                required
                 placeholder="Enter your username"
                 className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 onInput={(e) => setUsername(e.currentTarget.value)}
@@ -95,6 +115,7 @@ export default function Register() {
               <input
                 id="email"
                 type="email"
+                required
                 placeholder="you@example.com"
                 className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 onInput={(e) => {
@@ -119,6 +140,7 @@ export default function Register() {
               <input
                 id="password"
                 type="password"
+                required
                 placeholder="••••••••"
                 className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 onInput={(e) => setPassword1(e.currentTarget.value)}
@@ -134,10 +156,11 @@ export default function Register() {
               <input
                 id="confirm-password"
                 type="password"
+                required
                 placeholder="••••••••"
                 onInput={(e) => setPassword2(e.currentTarget.value)}
-                className={`w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                mismatch
+                className={`w-full px-4 py-3 rounded-lg bg-gray-900 border text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent transition ${
+                  mismatch
                     ? "border-red-500/60 focus:ring-red-500"
                     : "border-gray-700 focus:ring-indigo-500"
                 }`}
@@ -151,9 +174,19 @@ export default function Register() {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="mt-2 w-full py-3 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+              className="mt-2 flex items-center justify-center w-full py-3 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-indigo-600"
             >
-              Create Account
+              {registerMutation.isPending ? (
+                <>
+                  Registering
+                  <LoaderCircle
+                    size={30}
+                    className="animate-spin"
+                  ></LoaderCircle>
+                </>
+              ) : (
+                "Create Account"
+              )}
             </button>
           </form>
 

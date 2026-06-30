@@ -62,8 +62,8 @@ export default function ItemDetail({
                   Cancel
                 </button>
                 <button
-                  onClick={async () => {
-                    await deleteClothingItem.mutateAsync(item.id);
+                  onClick={() => {
+                    deleteClothingItem.mutate(item.id);
 
                     onDelete!();
                     onClose();

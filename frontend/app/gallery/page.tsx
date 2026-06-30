@@ -36,7 +36,7 @@ export default function Gallery() {
   const [addItemModalOpen, setAddItemModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [searchParam, setSearchParam] = useState<string>("");
-  const { Logout } = useAuth();
+  const { logoutMutation } = useAuth();
   const [toggleSettings, setToggleSettings] = useState<boolean>(false);
   const [settingsModal, setSettingsModal] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -132,7 +132,7 @@ export default function Gallery() {
                 <button
                   type="button"
                   className="cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white active:scale-95"
-                  onClick={() => Logout()}
+                  onClick={() => logoutMutation.mutateAsync()}
                 >
                   <LogOutIcon size={20} />
                 </button>

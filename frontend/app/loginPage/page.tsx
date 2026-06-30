@@ -1,35 +1,42 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useUserData, useAuth } from "@/functions/auth";
-import { useQueryClient } from "@tanstack/react-query";
+import { useContext } from "react";
+import { useAuth } from "@/functions/auth";
 import { useGoogleLogin } from "@react-oauth/google";
+import { ErrorContext } from "../context/errorContext";
+import ErrorBanner from "@/components/ErrorBanner";
 
 export default function LoginPage() {
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-  const queryClient = useQueryClient();
   // the colon syntax data: user means "take the property called data, but call it user in my local scope instead.
-  const { userData } = useUserData();
-  const { Login, GoogleLogin } = useAuth();
+
+  const { loginMutation, googleLoginMutation } = useAuth();
+  const errorContext = useContext(ErrorContext);
 
   const googleLogin = useGoogleLogin({
-    onSuccess: async (response) => {
-      await GoogleLogin({ code: response.code });
+    onSuccess: (response) => {
+      googleLoginMutation.mutate({ code: response.code });
     },
     flow: "auth-code",
   });
 
-  useEffect(() => {
-    if (userData.data) {
-      router.push("/gallery");
-    }
-  }, [userData.data, router]);
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4">
+      {errorContext.errorMessages.length > 0 && (
+        <div className="flex flex-col fixed top-4 left-1/2 -translate-x-1/2 z-100 gap-1 ">
+          {errorContext.errorMessages.map((msg, index) => (
+            <ErrorBanner
+              key={index}
+              message={msg}
+              onClose={() =>
+                errorContext.setErrorMessages((prev) =>
+                  prev.filter((_, i) => i != index),
+                )
+              }
+            />
+          ))}
+        </div>
+      )}
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <Image
@@ -49,24 +56,14 @@ export default function LoginPage() {
         <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-gray-700/50 border-t-2 border-t-indigo-500">
           <form
             className="flex flex-col gap-5"
-            onSubmit={async (e) => {
+            onSubmit={(e) => {
               e.preventDefault();
               // FormData reads input values by their `name` attribute from the submitted form
               // new FormData(e.currentTarget) reads all the name/value pairs from all inputs inside that form.
               const formData = new FormData(e.currentTarget);
               const username = formData.get("username") as string;
               const password = formData.get("password") as string;
-
-              const loginResponse: Response = await Login({
-                username,
-                password,
-              });
-              if (loginResponse.ok) {
-                await queryClient.invalidateQueries({ queryKey: ["whoami"] });
-                router.push("/gallery");
-              } else {
-                setError("Invalid username or password. Please try again.");
-              }
+              loginMutation.mutate({ username, password });
             }}
           >
             <div className="flex flex-col gap-1.5">
@@ -79,7 +76,8 @@ export default function LoginPage() {
               <input
                 id="username"
                 name="username"
-                onChange={() => setError(null)}
+                required
+                onChange={(e) => e.currentTarget.setCustomValidity("")}
                 type="text"
                 placeholder="Enter your username"
                 className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
@@ -95,14 +93,14 @@ export default function LoginPage() {
               <input
                 id="password"
                 name="password"
-                onChange={() => setError(null)}
+                required
+                onChange={(e) => e.currentTarget.setCustomValidity("")}
                 type="password"
                 placeholder="••••••••"
                 className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
               />
             </div>
 
-            {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
             <button
               type="submit"
               className="mt-2 w-full py-3 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800"
