@@ -49,8 +49,8 @@ export default function Gallery() {
     category: categoryFilter === "All" ? "" : categoryFilter,
   });
 
-  const clothingItems: ClothingItem[] = (getAllItems.data ?? []).sort((a, b) =>
-    a.name.localeCompare(b.name),
+  const clothingItems: ClothingItem[] = (getAllItems.data ?? []).sort(
+    (a: ClothingItem, b: ClothingItem) => a.name.localeCompare(b.name),
   );
   const categoriesAvailable: Category[] = getCategories.data
     ? [
