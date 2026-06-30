@@ -126,7 +126,7 @@ export default function OurSettings({
 }) {
   // the colon syntax data: user means "take the property called data, but call it user in my local scope instead.
   const { userData } = useUserData();
-  const { Logout } = useAuth();
+  const { logoutMutation } = useAuth();
 
   return (
     <div className="min-h-screen bg-transparent px-4 py-6">
@@ -183,7 +183,7 @@ export default function OurSettings({
         {/* Logout */}
         <button
           type="button"
-          onClick={() => Logout()}
+          onClick={() => logoutMutation.mutate()}
           className="flex w-full items-center gap-3 rounded-2xl border border-gray-800 bg-gray-900/50 px-4 py-3 text-left text-red-400 transition hover:bg-red-500/10 hover:text-red-300 active:scale-[0.99]"
         >
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10">
