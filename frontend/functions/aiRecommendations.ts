@@ -45,14 +45,10 @@ const fetchAiRecommendations = async (id: number) => {
       credentials: "include",
     },
   );
-  if (res.ok) {
-    const data = await res.json();
-    if (data.length === 0)
-      throw new Error(`No recommendations found for ${id}`);
-    return data;
-  } else {
-    return res.json();
-  }
+  if (!res.ok) throw new Error(`Failed to fetch recommendations (${res.status})`);
+  const data = await res.json();
+  if (data.length === 0) throw new Error(`No recommendations found for ${id}`);
+  return data;
 };
 
 const refreshAiRecommendations = async (id: number) => {

@@ -82,17 +82,23 @@ const useClothingItems = ({
     onMutate: async (deletedItem) => {
       await queryClient.cancelQueries({ queryKey: ["clothingItems"] });
 
-      const previousItems = queryClient.getQueryData(["clothingItems"]);
-      // old is the entire list of items
-      queryClient.setQueryData(["clothingItems"], (old: ClothingItem[]) => {
-        if (!old) return old;
-        return old.filter((item) => item.id !== deletedItem.id);
+      const previousData = queryClient.getQueriesData<ClothingItem[]>({
+        queryKey: ["clothingItems"],
       });
+      queryClient.setQueriesData<ClothingItem[]>(
+        { queryKey: ["clothingItems"] },
+        (old) => {
+          if (!old) return old;
+          return old.filter((item) => item.id !== deletedItem);
+        },
+      );
 
-      return { previousItems };
+      return { previousData };
     },
     onError: (err, variables, context) => {
-      queryClient.setQueryData(["clothingItems"], context?.previousItems);
+      context?.previousData.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
+      });
     },
     onSettled: (data, error, variables) => {
       invalidateClothingItem_s(null);
@@ -216,7 +222,8 @@ async function addClothingItemFn(formData: FormData) {
     process.env.NEXT_PUBLIC_API_URL + "/v1/clothing_items/",
     { method: "POST", body: formData },
   );
-  if (!response.ok) throw friendlyError(response.status, "add clothing item");
+  if (!response.ok)
+    throw await friendlyError(response.status, "add clothing item", response);
   return response;
 }
 
@@ -238,7 +245,11 @@ async function getClothingItems(
     { method: "GET" },
   );
   if (!response.ok)
-    throw friendlyError(response.status, "fetch clothing items");
+    throw await friendlyError(
+      response.status,
+      "fetch clothing items",
+      response,
+    );
   return await response.json();
 }
 
@@ -247,7 +258,8 @@ async function getClothingItem(id: number) {
     process.env.NEXT_PUBLIC_API_URL + `/v1/clothing_items/${id}`,
     { method: "GET" },
   );
-  if (!response.ok) throw friendlyError(response.status, "fetch clothing item");
+  if (!response.ok)
+    throw await friendlyError(response.status, "fetch clothing item", response);
   return response.json();
 }
 
@@ -272,7 +284,8 @@ async function editClothingItemFn(id: number, formData: FormData) {
         : JSON.stringify(bodyData),
     },
   );
-  if (!response.ok) throw friendlyError(response.status, "edit clothing item");
+  if (!response.ok)
+    throw await friendlyError(response.status, "edit clothing item", response);
   return response.json();
 }
 
@@ -282,7 +295,11 @@ async function deleteClothingItemFn(id: number) {
     { headers: { "Content-Type": "application/json" }, method: "DELETE" },
   );
   if (!response.ok)
-    throw friendlyError(response.status, "delete clothing item");
+    throw await friendlyError(
+      response.status,
+      "delete clothing item",
+      response,
+    );
   return response;
 }
 
@@ -291,7 +308,8 @@ async function fetchAvailableCategoriesFn() {
     process.env.NEXT_PUBLIC_API_URL + `/v1/categories/`,
     { method: "GET" },
   );
-  if (!response.ok) throw friendlyError(response.status, "fetch categories");
+  if (!response.ok)
+    throw await friendlyError(response.status, "fetch categories", response);
   return response.json();
 }
 
@@ -304,7 +322,8 @@ async function addNewCategoryFn(name: string) {
       body: JSON.stringify({ name }),
     },
   );
-  if (!response.ok) throw friendlyError(response.status, "add category");
+  if (!response.ok)
+    throw await friendlyError(response.status, "add category", response);
   return response.json();
 }
 
@@ -317,7 +336,8 @@ async function editAvailableCategoryFn(category: Category) {
       body: JSON.stringify({ id: `${category.id}`, name: `${category.name}` }),
     },
   );
-  if (!response.ok) throw friendlyError(response.status, "edit category");
+  if (!response.ok)
+    throw await friendlyError(response.status, "edit category", response);
   return response.json();
 }
 
@@ -326,7 +346,8 @@ async function deleteAvailableCategoryFn(category: Category) {
     process.env.NEXT_PUBLIC_API_URL + `/v1/categories/${category.id}/`,
     { method: "DELETE" },
   );
-  if (!response.ok) throw friendlyError(response.status, "delete category");
+  if (!response.ok)
+    throw await friendlyError(response.status, "delete category", response);
   return response;
 }
 
@@ -335,7 +356,8 @@ async function getTagsFn() {
     process.env.NEXT_PUBLIC_API_URL + `/v1/tags/`,
     { method: "GET" },
   );
-  if (!response.ok) throw friendlyError(response.status, "fetch tags");
+  if (!response.ok)
+    throw await friendlyError(response.status, "fetch tags", response);
   return response.json();
 }
 
@@ -344,6 +366,7 @@ async function deleteAvailableTagFn(tag: Tag) {
     process.env.NEXT_PUBLIC_API_URL + `/v1/tags/${tag.id}/`,
     { method: "DELETE" },
   );
-  if (!response.ok) throw friendlyError(response.status, "delete tag");
+  if (!response.ok)
+    throw await friendlyError(response.status, "delete tag", response);
   return response;
 }
