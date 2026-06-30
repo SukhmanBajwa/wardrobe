@@ -18,7 +18,11 @@ export const metadata: Metadata = {
   description: "Your personal wardrobe, organized.",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html>
       <body>

@@ -55,7 +55,9 @@ export default function Gallery() {
   const categoriesAvailable: Category[] = getCategories.data
     ? [
         { id: 0, name: "All" },
-        ...getCategories.data.sort((a, b) => a.name.localeCompare(b.name)),
+        ...getCategories.data.sort((a: Category, b: Category) =>
+          a.name.localeCompare(b.name),
+        ),
       ]
     : [{ id: 0, name: "All" }];
 
