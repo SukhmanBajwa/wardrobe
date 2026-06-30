@@ -27,7 +27,8 @@ class ClothingItemSerializer(serializers.ModelSerializer):
         return [row.tag.name for row in rows]
 
     def validate_category_name(self, value):
-        if not Category.objects.filter(name=value).exists():
+        user = self.context["request"].user
+        if not Category.objects.filter(name=value, user=user).exists():
             raise serializers.ValidationError(
                 f"{value} is not found in list of available categories."
             )
@@ -45,7 +46,12 @@ class ClothingItemSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         category_name = validated_data.pop("category_name", None)
-        category = Category.objects.get(name=category_name) if category_name else None
+        user = validated_data.get("user")
+        category = (
+            Category.objects.get(name=category_name, user=user)
+            if category_name
+            else None
+        )
         new_tags_json = validated_data.pop("new_tags", None)
         instance = ClothingItem.objects.create(category=category, **validated_data)
         self.handle_tags(instance, new_tags_json)
@@ -59,7 +65,9 @@ class ClothingItemSerializer(serializers.ModelSerializer):
         category_name = validated_data.pop("category_name", None)
 
         if category_name:
-            instance.category = Category.objects.get(name=category_name)
+            instance.category = Category.objects.get(
+                name=category_name, user=instance.user
+            )
 
         self.handle_tags(instance, validated_data.pop("new_tags", None))
 
