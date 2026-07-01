@@ -45,7 +45,7 @@ cloudinary.config(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -108,7 +108,7 @@ REST_AUTH = {
     "JWT_AUTH_COOKIE": "access-token",
     "JWT_AUTH_REFRESH_COOKIE": "refresh-token",
     "JWT_AUTH_HTTPONLY": True,
-    "JWT_AUTH_SECURE": False,  # True in production
+    "JWT_AUTH_SECURE": True,  # True in production
     "JWT_AUTH_SAMESITE": "Lax",
     "SESSION_LOGIN": False,
 }
