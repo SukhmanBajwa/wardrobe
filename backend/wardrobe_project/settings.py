@@ -10,17 +10,20 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-from pathlib import Path
-from decouple import Config, RepositoryEnv
 from datetime import timedelta
+import os
+from pathlib import Path
+from decouple import Config, RepositoryEnv, AutoConfig
 import cloudinary
-import cloudinary.uploader
-import cloudinary.api
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-DOTENV_FILE = BASE_DIR / ".penv"
-env_config = Config(RepositoryEnv(DOTENV_FILE))
+
+# Use .penv locally, environment variables in production
+if os.path.exists(BASE_DIR / ".penv"):
+    env_config = Config(RepositoryEnv(BASE_DIR / ".penv"))
+else:
+    env_config = AutoConfig()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
