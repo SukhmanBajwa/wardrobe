@@ -336,6 +336,11 @@ export default function Gallery() {
                 item={selectedItem}
               />
             )}
+            {clothingItems.length === 0 && (
+              <p>
+                Add new item to start. Click on add(+) icon from the bottom.
+              </p>
+            )}
           </main>
         </div>
       </div>
