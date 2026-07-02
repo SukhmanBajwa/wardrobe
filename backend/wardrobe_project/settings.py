@@ -51,6 +51,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "wardrobe-indol-theta.vercel.app",
+    "wardrobe-production-2ac5.up.railway.app",
 ]
 
 
