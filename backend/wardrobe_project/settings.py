@@ -46,7 +46,7 @@ cloudinary.config(
 IS_PRODUCTION = env_config("IS_PRODUCTION", default=False, cast=bool)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = IS_PRODUCTION
+DEBUG = not IS_PRODUCTION
 
 ALLOWED_HOSTS = [
     "localhost",
