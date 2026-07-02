@@ -114,7 +114,8 @@ REST_AUTH = {
     "JWT_AUTH_REFRESH_COOKIE": "refresh-token",
     "JWT_AUTH_HTTPONLY": True,
     "JWT_AUTH_SECURE": IS_PRODUCTION,  # True in production
-    "JWT_AUTH_SAMESITE": "None" if IS_PRODUCTION else "Lax",
+    "JWT_AUTH_SAMESITE": "Lax",
+    "JWT_AUTH_COOKIE_DOMAIN": ".sukhmanbajwa.com" if IS_PRODUCTION else None,
     "SESSION_LOGIN": False,
 }
 ACCOUNT_EMAIL_VERIFICATION = "none"
