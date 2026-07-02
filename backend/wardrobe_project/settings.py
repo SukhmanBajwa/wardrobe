@@ -117,6 +117,7 @@ REST_AUTH = {
     "JWT_AUTH_SAMESITE": "None" if IS_PRODUCTION else "Lax",
     "SESSION_LOGIN": False,
 }
+ACCOUNT_EMAIL_VERIFICATION = "none"
 
 ROOT_URLCONF = "wardrobe_project.urls"
 
