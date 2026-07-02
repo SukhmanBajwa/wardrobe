@@ -114,7 +114,7 @@ REST_AUTH = {
     "JWT_AUTH_REFRESH_COOKIE": "refresh-token",
     "JWT_AUTH_HTTPONLY": True,
     "JWT_AUTH_SECURE": True,  # True in production
-    "JWT_AUTH_SAMESITE": "Lax",
+    "JWT_AUTH_SAMESITE": "None",
     "SESSION_LOGIN": False,
 }
 
