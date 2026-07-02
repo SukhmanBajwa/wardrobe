@@ -51,8 +51,8 @@ DEBUG = not IS_PRODUCTION
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "wardrobe-indol-theta.vercel.app",
-    "wardrobe-production-2ac5.up.railway.app",
+    "wardrobe.sukhmanbajwa.com",
+    "wardrobeapi.sukhmanbajwa.com",
 ]
 
 
@@ -207,7 +207,8 @@ AUTH_USER_MODEL = "user.CustomUser"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://wardrobe-indol-theta.vercel.app",
+    "https://wardrobe.sukhmanbajwa.com",
+    "https://wardrobeapi.sukhmanbajwa.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
