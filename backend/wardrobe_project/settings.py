@@ -53,6 +53,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "wardrobe.sukhmanbajwa.com",
     "wardrobeapi.sukhmanbajwa.com",
+    "wardrobe-production-2ac5.up.railway.app",
 ]
 
 
@@ -209,7 +210,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://wardrobe.sukhmanbajwa.com",
-    "https://wardrobeapi.sukhmanbajwa.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
