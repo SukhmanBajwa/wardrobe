@@ -107,14 +107,14 @@ REST_FRAMEWORK = {
         "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
     ],
 }
-
+IS_PRODUCTION = env_config("IS_PRODUCTION", default=False, cast=bool)
 REST_AUTH = {
     "USE_JWT": True,
     "JWT_AUTH_COOKIE": "access-token",
     "JWT_AUTH_REFRESH_COOKIE": "refresh-token",
     "JWT_AUTH_HTTPONLY": True,
-    "JWT_AUTH_SECURE": True,  # True in production
-    "JWT_AUTH_SAMESITE": "None",
+    "JWT_AUTH_SECURE": IS_PRODUCTION,  # True in production
+    "JWT_AUTH_SAMESITE": "None" if IS_PRODUCTION else "Lax",
     "SESSION_LOGIN": False,
 }
 
