@@ -43,9 +43,10 @@ cloudinary.config(
     api_key=env_config("Cloudinary_API_KEY"),
     api_secret=env_config("Cloudinary_API_SECRET"),
 )
+IS_PRODUCTION = env_config("IS_PRODUCTION", default=False, cast=bool)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = IS_PRODUCTION
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -107,7 +108,6 @@ REST_FRAMEWORK = {
         "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
     ],
 }
-IS_PRODUCTION = env_config("IS_PRODUCTION", default=False, cast=bool)
 REST_AUTH = {
     "USE_JWT": True,
     "JWT_AUTH_COOKIE": "access-token",
