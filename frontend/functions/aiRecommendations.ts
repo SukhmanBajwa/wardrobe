@@ -63,13 +63,10 @@ const refreshAiRecommendations = async (id: number) => {
       credentials: "include",
     },
   );
-  if (res.status === 429) {
-    throw new Error(`${await res}`);
-  }
   if (!res.ok) {
     throw new Error(
-      `Cannot refresh the recommendations at this moment: ${await res.text()}`,
+      `Cannot refresh the recommendations at this moment: ${await res}`,
     );
   }
-  return res.json();
+  return res;
 };

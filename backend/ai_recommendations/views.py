@@ -69,7 +69,7 @@ class RegenerateRecommendationsAPIView(APIView):
     def get(self, request, item_id):
         try:
             call_command("recom", request.user.id, "--item_ids", item_id)
-            return Response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         except CommandError as e:
             error_message, error_status = str(e).split("|")
             return Response(

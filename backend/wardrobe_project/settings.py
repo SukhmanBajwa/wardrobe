@@ -30,8 +30,8 @@ else:
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env_config("SECRET_KEY")
-# ANTHROPIC_API_KEY = env_config("ANTHROPIC_API_KEY")
-# GEMINI_API_KEY = env_config("GEMINI_API_KEY")
+ANTHROPIC_API_KEY = env_config("ANTHROPIC_API_KEY")
+GEMINI_API_KEY = env_config("GEMINI_API_KEY")
 GROQ_API_KEY = env_config("GROQ_API_KEY")
 
 CLOUDINARY_STORAGE = {
@@ -235,16 +235,16 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-        },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "DEBUG",
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "handlers": {
+#         "console": {
+#             "class": "logging.StreamHandler",
+#         },
+#     },
+#     "root": {
+#         "handlers": ["console"],
+#         "level": "DEBUG",
+#     },
+# }
