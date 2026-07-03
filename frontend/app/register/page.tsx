@@ -6,6 +6,7 @@ import { useAuth } from "@/functions/auth";
 import ErrorBanner from "@/components/ErrorBanner";
 import { ErrorContext } from "../context/errorContext";
 import { LoaderCircle } from "lucide-react";
+import { useGoogleLogin } from "@react-oauth/google";
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -13,6 +14,7 @@ export default function Register() {
   const [password1, setPassword1] = useState("");
   const [password2, setPassword2] = useState("");
   const { registerMutation } = useAuth();
+  const { googleLoginMutation } = useAuth();
 
   const errorContext = useContext(ErrorContext);
 
@@ -20,6 +22,13 @@ export default function Register() {
     password1.length > 0 && password2.length > 0 && password1 !== password2;
   const canSubmit =
     password1.length > 0 && password2.length > 0 && password1 === password2;
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: (response) => {
+      googleLoginMutation.mutate({ code: response.code });
+    },
+    flow: "auth-code",
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 px-4">
@@ -171,23 +180,38 @@ export default function Register() {
                 </p>
               )}
             </div>
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="mt-2 flex items-center justify-center w-full py-3 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-indigo-600"
-            >
-              {registerMutation.isPending ? (
-                <>
-                  Registering
-                  <LoaderCircle
-                    size={30}
-                    className="animate-spin"
-                  ></LoaderCircle>
-                </>
-              ) : (
-                "Create Account"
-              )}
-            </button>
+            <div className=" flex flex-col items-center justify-evenly gap-2 ">
+              <button
+                type="submit"
+                disabled={!canSubmit}
+                className="mt-2 flex items-center justify-center w-full py-3 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-indigo-600"
+              >
+                {registerMutation.isPending ? (
+                  <>
+                    Registering
+                    <LoaderCircle
+                      size={30}
+                      className="animate-spin"
+                    ></LoaderCircle>
+                  </>
+                ) : (
+                  "Create Account"
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => googleLogin()}
+                className="w-full flex items-center justify-center min-h-12 max-h-12 gap-2 py-3 px-4 rounded-lg border border-gray-600 bg-gray-900 text-white hover:bg-gray-800 transition"
+              >
+                <Image
+                  src="/Google_Favicon_2025.svg"
+                  alt="Google Logo"
+                  width={25}
+                  height={25}
+                />
+                Sign in with Google
+              </button>
+            </div>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-500">
@@ -197,13 +221,6 @@ export default function Register() {
               className="text-indigo-400 hover:text-indigo-300 font-medium transition"
             >
               Sign in <br></br>
-            </a>
-            or with{" "}
-            <a
-              href="/loginPage"
-              className="text-indigo-400 hover:text-indigo-300 font-medium transition"
-            >
-              Google
             </a>
           </p>
         </div>

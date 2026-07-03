@@ -6,6 +6,7 @@ import { useAuth } from "@/functions/auth";
 import { useGoogleLogin } from "@react-oauth/google";
 import { ErrorContext } from "../context/errorContext";
 import ErrorBanner from "@/components/ErrorBanner";
+import { LoaderCircle } from "lucide-react";
 
 export default function LoginPage() {
   // the colon syntax data: user means "take the property called data, but call it user in my local scope instead.
@@ -105,7 +106,11 @@ export default function LoginPage() {
               type="submit"
               className="mt-2 w-full py-3 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800"
             >
-              Login
+              {loginMutation.isPending ? (
+                <LoaderCircle>Login in</LoaderCircle>
+              ) : (
+                "Login"
+              )}
             </button>
           </form>
           <div className="mt-2 flex flex-col items-center justify-evenly gap-2 ">
