@@ -14,7 +14,7 @@ export default function ErrorBanner({
   }, [onClose]);
 
   return (
-    <div className="animate-slide-down z-100">
+    <div className="animate-slide-down ">
       <div className="flex items-center gap-3 rounded-xl bg-red-900/90 border border-red-700 px-4 py-3 text-sm text-red-200 shadow-xl backdrop-blur-sm">
         <span>{message}</span>
 

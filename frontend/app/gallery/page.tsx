@@ -1,7 +1,6 @@
 "use client";
 import ClothingItemCard from "@/components/ClothingItemCard";
 import { useEffect, useState, useContext } from "react";
-import { ErrorContext } from "../context/errorContext";
 import Image from "next/image";
 import Link from "next/link";
 import ItemDetail from "@/components/ItemDetail";
@@ -27,7 +26,6 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import Account from "@/components/Account";
-import ErrorBanner from "@/components/ErrorBanner";
 
 export default function Gallery() {
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
@@ -40,7 +38,6 @@ export default function Gallery() {
   const [toggleSettings, setToggleSettings] = useState<boolean>(false);
   const [settingsModal, setSettingsModal] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
-  const errorContext = useContext(ErrorContext);
 
   const placeholder: number[] = [1, 2, 3, 4, 5, 6];
 
@@ -140,21 +137,6 @@ export default function Gallery() {
                 </button>
               </div>
             </div>
-            {errorContext.errorMessages.length > 0 && (
-              <div className="flex flex-col fixed top-4 left-1/2 -translate-x-1/2 z-100 gap-1 ">
-                {errorContext.errorMessages.map((msg, index) => (
-                  <ErrorBanner
-                    key={index}
-                    message={msg}
-                    onClose={() =>
-                      errorContext.setErrorMessages((prev) =>
-                        prev.filter((_, i) => i != index),
-                      )
-                    }
-                  />
-                ))}
-              </div>
-            )}
           </header>
 
           <main className="reletive flex-1 px-4 sm:px-6">
