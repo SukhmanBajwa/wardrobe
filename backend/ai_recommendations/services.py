@@ -35,6 +35,7 @@ def Ai_Recommendation(item_info, inventory_data):
         response_text = llm_provider.generate_recommendation(
             item_info, inventory_data, example
         )
+
     except RateLimitError as e:
         return (
             f"Rate limit exceeded, please try again later: {str(e)}",
