@@ -1,15 +1,16 @@
-from .models import AiRecommendation
-from wardrobe.models import ClothingItem
+import json
+from groq import APIError, RateLimitError
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from django.conf import settings
+from wardrobe.models import ClothingItem
+from .models import AiRecommendation
+from .llm_providers.groq_provider import GroqProvider
+from .llm_providers.gemini_provider import GeminiProvider
 
-# import anthropic
-from google import genai
-import json
 
-# client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-client = genai.Client(api_key=settings.GEMINI_API_KEY)
+# get the llm
+def get_llm_provider():
+    return GroqProvider()
 
 
 def Ai_Recommendation(item_info, inventory_data):
@@ -27,23 +28,22 @@ def Ai_Recommendation(item_info, inventory_data):
             "Complete_outfit": [2,3,4]
             }
             """
-    response = client.models.generate_content(
-        # model="gemini-2.5-flash",
-        model="gemini-3.1-flash-lite",
-        # model="gemini-2.5-flash-lite",
-        contents=f"""
-                src: {item_info}, inv_list: {inventory_data}
-                Recommend clothing items from inv_list that pair well with src.
-                IMPORTANT: Use only the numeric 'id' field from inv_list items. Never use names.
-                Reply ONLY in JSON.
-                Good_match: array of single key-value objects where key is item id as string and value is reason.
-                Complete_outfit: array of item ids as integers.
-                following is the example of reply requested
-                {example}
-                """,
-    )
 
-    response_text_split = list(response.text)
+    # create instance of llm provider
+    llm_provider = get_llm_provider()
+    try:
+        response_text = llm_provider.generate_recommendation(
+            item_info, inventory_data, example
+        )
+    except RateLimitError as e:
+        return (
+            f"Rate limit exceeded, please try again later: {str(e)}",
+            status.HTTP_429_TOO_MANY_REQUESTS,
+        )
+    except APIError as e:
+        return (f"AI provider error: {str(e)}", status.HTTP_502_BAD_GATEWAY)
+
+    response_text_split = list(response_text)
     cleaned_response = ""
     first_curly_index = 0
     last_curly_index = len(response_text_split) - 1
@@ -61,7 +61,7 @@ def Ai_Recommendation(item_info, inventory_data):
     )
 
     try:
-        print(cleaned_response)
+
         return (json.loads(cleaned_response), status.HTTP_200_OK)
 
     except json.JSONDecodeError:
