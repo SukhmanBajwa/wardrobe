@@ -23,14 +23,15 @@ class RecommendationsAPIView(APIView):
                 recommendations = AiRecommendation.objects.filter(
                     item=item,
                     recommended_item__is_deleted=False,
-                )
+                ).select_related("recommended_item", "item")
 
                 # get the recommendations where the item in scope is recommended
                 # i.e. if item A has been recommended in item B, view of item B should automatically show the item A in recommendation
                 recommendations_backwards = AiRecommendation.objects.filter(
                     recommended_item=item,
                     recommended_item__is_deleted=False,
-                )
+                ).select_related("recommended_item", "item")
+
                 forward_data = AiRecommendationsSerilizer(
                     recommendations, many=True
                 ).data
