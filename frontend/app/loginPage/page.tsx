@@ -104,10 +104,13 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="mt-2 w-full py-3 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+              className=" mt-2 w-full py-3 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800"
             >
               {loginMutation.isPending ? (
-                <LoaderCircle>Login in</LoaderCircle>
+                <div className="flex items-center justify-center">
+                  Login in
+                  <LoaderCircle className="animate-spin"></LoaderCircle>
+                </div>
               ) : (
                 "Login"
               )}
