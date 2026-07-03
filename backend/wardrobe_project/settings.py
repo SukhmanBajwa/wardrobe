@@ -235,6 +235,11 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://wardrobeapi.sukhmanbajwa.com",
+    "https://wardrobe.sukhmanbajwa.com",
+]
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
