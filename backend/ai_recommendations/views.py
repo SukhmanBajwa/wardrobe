@@ -6,8 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from ai_recommendations.models import AiRecommendation
 from .serializers import AiRecommendationsSerilizer, AiRecommendationsBackwardSerilizer
-from .management.commands import recom
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
 
 
 # Create your views here.
@@ -64,7 +63,16 @@ class RecommendationsAPIView(APIView):
         )
 
 
-class RegenerateRecommendations(APIView):
+class RegenerateRecommendationsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, item_id):
-        call_command("recom", request.user.id, "--item_ids", item_id)
-        return Response(status=status.HTTP_200_OK)
+        try:
+            call_command("recom", request.user.id, "--item_ids", item_id)
+            return Response(status=status.HTTP_200_OK)
+        except CommandError as e:
+            error_message, error_status = str(e).split("|")
+            return Response(
+                {"detail": error_message},
+                status=int(error_status),
+            )

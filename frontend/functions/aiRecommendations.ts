@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState, useRef } from "react";
 import { fetchWithAuth } from "./fetchWithAuth";
 
@@ -24,14 +24,17 @@ const useAiRecommendations = (id: number) => {
     refetchInterval: isRefreshing ? 2000 : false,
   });
 
-  const triggerRefresh = async () => {
-    previousDataRef.current = getAiRecommendation.data ?? null;
-    await refreshAiRecommendations(id);
-    setIsRefreshing(true);
-  };
+  const refreshMutation = useMutation({
+    mutationFn: async () => {
+      previousDataRef.current = getAiRecommendation.data ?? null;
+      return await refreshAiRecommendations(id);
+    },
+    onSuccess: () => setIsRefreshing(true),
+  });
   return {
     getAiRecommendation,
-    triggerRefresh,
+    // Direct run mutate, when user call triggerRefresh
+    triggerRefresh: refreshMutation.mutate,
     isRefreshing,
   };
 };
@@ -45,7 +48,8 @@ const fetchAiRecommendations = async (id: number) => {
       credentials: "include",
     },
   );
-  if (!res.ok) throw new Error(`Failed to fetch recommendations (${res.status})`);
+  if (!res.ok)
+    throw new Error(`Failed to fetch recommendations (${res.status})`);
   const data = await res.json();
   if (data.length === 0) throw new Error(`No recommendations found for ${id}`);
   return data;
@@ -59,8 +63,13 @@ const refreshAiRecommendations = async (id: number) => {
       credentials: "include",
     },
   );
-  if (!res.ok) {
-    return res.json();
+  if (res.status === 429) {
+    throw new Error(`${await res}`);
   }
-  return res;
+  if (!res.ok) {
+    throw new Error(
+      `Cannot refresh the recommendations at this moment: ${await res.text()}`,
+    );
+  }
+  return res.json();
 };

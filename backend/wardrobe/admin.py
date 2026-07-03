@@ -14,7 +14,6 @@ class ClothingItemTagInline(admin.TabularInline):
 class ClothingItemAdmin(admin.ModelAdmin):
 
     def tags(self, obj):
-        print("working")
         return [row.tag.name for row in obj.item.all()]
 
     inlines = [ClothingItemTagInline]

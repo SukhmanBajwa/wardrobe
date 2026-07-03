@@ -59,9 +59,6 @@ class ClothingItemSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        print("UPDATE CALLED")
-        print("validated_data:", validated_data)
-        print("instance before:", instance.name, instance.category)
         category_name = validated_data.pop("category_name", None)
 
         if category_name:

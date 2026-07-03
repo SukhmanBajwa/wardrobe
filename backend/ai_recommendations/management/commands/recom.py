@@ -1,3 +1,4 @@
+import time
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from ai_recommendations.models import AiRecommendation
@@ -7,7 +8,7 @@ from ai_recommendations import services
 
 
 class Command(BaseCommand):
-    help = """Regenerate AI recommendations for a user's clothing items, eg cmd py manage.py recom 6
+    help = """Regenerate AI recommendations for a user's clothing items, like: py manage.py <user_id> --item_ids <item id or ids>, where item ids are optional. eg cmd: py manage.py recom 6
         py manage.py recom 6 --item_ids 37 4 16"""
 
     def add_arguments(self, parser):
@@ -27,6 +28,7 @@ class Command(BaseCommand):
 
         for item in items:
             self._generate_for_item(item, inventory)
+            time.sleep(2)  # wait 2 seconds between requests to avoid rate limiting
             self.stdout.write(f"  ✓ {item.name}")
 
         self.stdout.write(
@@ -50,8 +52,9 @@ class Command(BaseCommand):
         ).data
 
     def _generate_for_item(self, item, inventory):
-        """Deletes existing recommendations for item and generates new ones."""
-        AiRecommendation.objects.filter(item=item).delete()
+        """Replaces existing recommendations for item and generates new ones."""
         item_info = ClothingItemSerializer(item).data
-        ai_reply, _ = services.Ai_Recommendation(item_info, inventory)
-        services.Save_Ai_Recommendations(item.id, ai_reply)
+        ai_reply, response_status = services.Ai_Recommendation(item_info, inventory)
+        if response_status == 200:
+            AiRecommendation.objects.filter(item=item).delete()
+            services.Save_Ai_Recommendations(item.id, ai_reply)

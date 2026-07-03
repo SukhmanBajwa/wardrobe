@@ -227,6 +227,12 @@ export default function ItemDetail({
                   )}
               </div>
             )}
+            {!getAiRecommendation.data && !getAiRecommendation.isLoading ? (
+              <p>
+                No recommendations found, please click refresh button to
+                generate.
+              </p>
+            ) : null}
           </div>
 
           {selectedRecommendation && (

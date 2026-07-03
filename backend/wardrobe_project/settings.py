@@ -30,8 +30,9 @@ else:
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env_config("SECRET_KEY")
-ANTHROPIC_API_KEY = env_config("ANTHROPIC_API_KEY")
-GEMINI_API_KEY = env_config("GEMINI_API_KEY")
+# ANTHROPIC_API_KEY = env_config("ANTHROPIC_API_KEY")
+# GEMINI_API_KEY = env_config("GEMINI_API_KEY")
+GROQ_API_KEY = env_config("GROQ_API_KEY")
 
 CLOUDINARY_STORAGE = {
     "CLOUD_NAME": env_config("Cloudinary_Cloud_Name"),
