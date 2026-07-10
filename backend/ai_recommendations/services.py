@@ -4,11 +4,14 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from wardrobe.models import ClothingItem
 from .models import AiRecommendation
+from wardrobe.serializers import ClothingItemSerializer
 from .llm_providers.groq_provider import GroqProvider
 from .llm_providers.gemini_provider import GeminiProvider
 
 
 # get the llm
+# choose the llm provider here
+# refer to llm_providers folder for available options
 def get_llm_provider():
     return GroqProvider()
 
@@ -89,3 +92,24 @@ def Save_Ai_Recommendations(item_id, ai_recommendations):
                 best_match=is_best_match,
             )
             is_best_match = False
+
+
+def generate_and_save_recommendations(item, inventory_data=None):
+    """Generates and saves AI recommendations for a single item.
+    Returns (error_message, status_code) — error_message is None on success."""
+    if inventory_data is None:
+
+        inventory_data = ClothingItemSerializer(
+            ClothingItem.objects.filter(user=item.user, is_deleted=False),
+            many=True,
+        ).data
+
+    item_info = ClothingItemSerializer(item).data
+    ai_reply, response_status = Ai_Recommendation(item_info, inventory_data)
+
+    if response_status != status.HTTP_200_OK:
+        return ai_reply, response_status
+
+    AiRecommendation.objects.filter(item=item).delete()
+    Save_Ai_Recommendations(item.id, ai_reply)
+    return None, status.HTTP_200_OK

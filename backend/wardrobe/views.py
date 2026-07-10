@@ -29,12 +29,6 @@ class ClothingItemViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(category__name=category)
         return queryset
 
-    @staticmethod
-    def run_recommendations(new_item, inventory_data):
-        item_info = ClothingItemSerializer(new_item).data
-        ai_reply, _ = services.Ai_Recommendation(item_info, inventory_data)
-        services.Save_Ai_Recommendations(new_item.id, ai_reply)
-
     # method override from CreateModelMixin to change the behaviour of save. Include user info
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

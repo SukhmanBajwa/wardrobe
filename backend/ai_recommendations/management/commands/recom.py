@@ -1,14 +1,12 @@
 import time
 from django.core.management.base import BaseCommand
-from django.contrib.auth import get_user_model
-from ai_recommendations.models import AiRecommendation
 from wardrobe.models import ClothingItem
 from wardrobe.serializers import ClothingItemSerializer
 from ai_recommendations import services
 
 
 class Command(BaseCommand):
-    help = """Regenerate AI recommendations for a user's clothing items, like: py manage.py <user_id> --item_ids <item id or ids>, where item ids are optional. eg cmd: py manage.py recom 6
+    help = """Regenerate AI recommendations for a user's clothing items, like: py manage.py <user_id> <optional: <item_id>> eg cmd: py manage.py recom 6
         py manage.py recom 6 --item_ids 37 4 16"""
 
     def add_arguments(self, parser):
@@ -27,13 +25,18 @@ class Command(BaseCommand):
         inventory = self._get_inventory(user_id)
 
         for item in items:
-            self._generate_for_item(item, inventory)
-            time.sleep(2)  # wait 2 seconds between requests to avoid rate limiting
-            self.stdout.write(f"  ✓ {item.name}")
+            error, response_status = services.generate_and_save_recommendations(
+                item, inventory_data=inventory
+            )
+            if error:
+                self.stderr.write(f"  ✗ {item.name}: {error}")
+            else:
+                self.stdout.write(f"  ✓ {item.name}")
+            time.sleep(2)
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Done. Generated recommendations for {items.count()} items."
+                f"Done. Processed recommendations for {items.count()} items."
             )
         )
 
@@ -50,11 +53,3 @@ class Command(BaseCommand):
             ClothingItem.objects.filter(user=user_id, is_deleted=False),
             many=True,
         ).data
-
-    def _generate_for_item(self, item, inventory):
-        """Replaces existing recommendations for item and generates new ones."""
-        item_info = ClothingItemSerializer(item).data
-        ai_reply, response_status = services.Ai_Recommendation(item_info, inventory)
-        if response_status == 200:
-            AiRecommendation.objects.filter(item=item).delete()
-            services.Save_Ai_Recommendations(item.id, ai_reply)

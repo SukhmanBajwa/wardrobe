@@ -1,12 +1,12 @@
 from rest_framework.views import APIView
-from wardrobe.models import ClothingItem
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from wardrobe.models import ClothingItem
+from ai_recommendations import services
 from ai_recommendations.models import AiRecommendation
 from .serializers import AiRecommendationsSerilizer, AiRecommendationsBackwardSerilizer
-from django.core.management import CommandError, call_command
 
 
 # Create your views here.
@@ -68,12 +68,8 @@ class RegenerateRecommendationsAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, item_id):
-        try:
-            call_command("recom", request.user.id, "--item_ids", item_id)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except CommandError as e:
-            error_message, error_status = str(e).split("|")
-            return Response(
-                {"detail": error_message},
-                status=int(error_status),
-            )
+        item = get_object_or_404(ClothingItem, id=item_id, user=request.user)
+        error, response_status = services.generate_and_save_recommendations(item)
+        if error:
+            return Response({"detail": error}, status=response_status)
+        return Response(status=status.HTTP_204_NO_CONTENT)
