@@ -49,21 +49,31 @@ IS_PRODUCTION = env_config("IS_PRODUCTION", default=False, cast=bool)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = not IS_PRODUCTION
 
-ALLOWED_HOSTS = [
+local_allowed_host = [
+    "192.168.1.78",
     "localhost",
     "127.0.0.1",
+]
+
+ALLOWED_HOSTS = [
     "wardrobe.sukhmanbajwa.com",
     "wardrobeapi.sukhmanbajwa.com",
     "wardrobe-production-2ac5.up.railway.app",
-    "192.168.1.78",
+]
+
+local_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://192.168.1.78:8000",
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
     "https://wardrobe.sukhmanbajwa.com",
-    "http://192.168.1.78:8000",
 ]
+if not IS_PRODUCTION:
+    CORS_ALLOWED_ORIGINS.extend(local_origins)
+    ALLOWED_HOSTS.extend(local_allowed_host)
+
 CORS_ALLOW_CREDENTIALS = True
 
 
