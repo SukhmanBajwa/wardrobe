@@ -55,7 +55,16 @@ ALLOWED_HOSTS = [
     "wardrobe.sukhmanbajwa.com",
     "wardrobeapi.sukhmanbajwa.com",
     "wardrobe-production-2ac5.up.railway.app",
+    "192.168.1.78",
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://wardrobe.sukhmanbajwa.com",
+    "http://192.168.1.78:8000",
+]
+CORS_ALLOW_CREDENTIALS = True
 
 
 # Application definition
@@ -207,12 +216,6 @@ STORAGES = {
 
 AUTH_USER_MODEL = "user.CustomUser"
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://wardrobe.sukhmanbajwa.com",
-]
-CORS_ALLOW_CREDENTIALS = True
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
@@ -220,6 +223,7 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=24),  # 24 hours
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # 7 days
     "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
 
 SOCIALACCOUNT_PROVIDERS = {
