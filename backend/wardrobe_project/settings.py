@@ -44,7 +44,7 @@ cloudinary.config(
     api_key=env_config("Cloudinary_API_KEY"),
     api_secret=env_config("Cloudinary_API_SECRET"),
 )
-IS_PRODUCTION = env_config("IS_PRODUCTION", default=False, cast=bool)
+IS_PRODUCTION = env_config("IS_PRODUCTION", default=True, cast=bool)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = not IS_PRODUCTION
@@ -58,7 +58,6 @@ local_allowed_host = [
 ALLOWED_HOSTS = [
     "wardrobe.sukhmanbajwa.com",
     "wardrobeapi.sukhmanbajwa.com",
-    "wardrobe-production-2ac5.up.railway.app",
 ]
 
 local_origins = [
