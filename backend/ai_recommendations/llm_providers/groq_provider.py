@@ -3,6 +3,7 @@ from django.conf import settings
 from .base import LLMProvider
 
 
+# not xAI GROK!!!
 class GroqProvider(LLMProvider):
     def __init__(self):
         self.client = Groq(api_key=settings.GROQ_API_KEY)
